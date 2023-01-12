@@ -38,22 +38,27 @@ class KrasserAgent(Agent):
     def __init__(self):
         self.position = Point()
         self.home = Point()
-        self.orientation = Orientation.NORTH
+        self.orientation = Orientation.SOUTH
         self.turned_on = False
         self.visited = {self.home}
+        self.bump_counter = 0
+        self.go_home = False
 
     # this method is called on the start of the new environment
     def start(self):
         print("start called")
+        self.__init__()
         return
 
     # this method is called when the environment has reached a terminal state
     # override it to reset the agent
     def cleanup(self, percepts):
         print("cleanup called")
-        self.orientation = Orientation.NORTH
+        self.orientation = Orientation.SOUTH
         self.turned_on = False
         self.visited = {self.home}
+        self.bump_counter = 0
+        self.go_home = False
 
     def turn_on(self):
         self.turned_on = True
@@ -90,8 +95,20 @@ class KrasserAgent(Agent):
         if not self.turned_on:
             return self.turn_on()
 
+        if self.go_home == True:
+            if self.position.__eq__(self.home):
+                print("FOUND HOME")
+                return self.turn_off()
+            if self.position.x > 0:
+                ## DO Stuff
+
         if "BUMP" in percepts:
             self.undo_move()
+            if self.bump_counter < 2:
+                self.bump_counter += 1
+            if self.bump_counter == 2:
+                print("FOUND CORNER")
+                self.go_home = True
             return self.turn_right()
 
         if "DIRT" in percepts:
