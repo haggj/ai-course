@@ -10,6 +10,8 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 import re
 import sys
 import random
+
+from KrasserAgent import KrasserAgent
 from agent import *
 
 #########
@@ -105,7 +107,7 @@ class GGPRequestHandler(BaseHTTPRequestHandler):
 
 def main():
   # TODO: use your own agent here
-  agent = RandomAgent()
+  agent = KrasserAgent()
 
   # read command line argument(s)
   port = 4001

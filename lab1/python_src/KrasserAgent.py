@@ -80,6 +80,9 @@ class KrasserAgent(Agent):
         self.visited.remove(self.position)
         self.position.__move__(self.orientation, -1)
 
+    def suck(self):
+        return "SUCK"
+
     # this method is called on each time step of the environment
     # it needs to return the action the agent wants to execute as as string
     def next_action(self, percepts):
@@ -90,5 +93,8 @@ class KrasserAgent(Agent):
         if "BUMP" in percepts:
             self.undo_move()
             return self.turn_right()
+
+        if "DIRT" in percepts:
+            return self.suck()
 
         return self.go()
