@@ -110,6 +110,7 @@ class KrasserAgent(Agent):
                 return self.turn_off()
             if self.position.x > 0:
                 ## DO Stuff
+                pass
 
         if "BUMP" in percepts and self.bump_counter < 2:
             # Initialization mode
