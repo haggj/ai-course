@@ -122,6 +122,8 @@ class KrasserAgent(Agent):
         if "BUMP" in percepts and self.bump_counter == 2:
             # Snake mode
             self.undo_move()
+            if self.uturn == UturnPhase.GO:
+                return self.turn_off()
             self.old_orientation = self.orientation
             self.uturn = UturnPhase.FIRST_TURN
             if self.old_orientation == Orientation.NORTH or self.old_orientation == Orientation.EAST:
