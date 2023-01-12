@@ -144,7 +144,7 @@ class KrasserAgent(Agent):
             # Snake mode
             self.undo_move()
             if self.uturn == UturnPhase.GO:
-                return self.turn_off()
+                self.go_home = True
             self.old_orientation = self.orientation
             self.uturn = UturnPhase.FIRST_TURN
             if self.old_orientation == Orientation.NORTH or self.old_orientation == Orientation.EAST:
