@@ -108,9 +108,30 @@ class KrasserAgent(Agent):
             if self.position.__eq__(self.home):
                 print("FOUND HOME")
                 return self.turn_off()
-            if self.position.x > 0:
-                ## DO Stuff
-                pass
+            elif self.position.x > 0:
+                """ NEED TO MOVE WEST """
+                if self.orientation == Orientation.WEST:
+                    return self.go()
+                else:
+                    return self.turn_right()
+            elif self.position.x < 0:
+                """ NEED TO MOVE EAST """
+                if self.orientation == Orientation.EAST:
+                    return self.go()
+                else:
+                    return self.turn_right()
+            elif self.position.x == 0 and self.position.y > 0:
+                """ NEED TO MOVE SOUTH """
+                if self.orientation == Orientation.SOUTH:
+                    return self.go()
+                else:
+                    return self.turn_right()
+            elif self.position.x == 0 and self.position.y < 0:
+                """ NEED TO MOVE NORTH """
+                if self.orientation == Orientation.NORTH:
+                    return self.go()
+                else:
+                    return self.turn_right()
 
         if "BUMP" in percepts and self.bump_counter < 2:
             # Initialization mode
