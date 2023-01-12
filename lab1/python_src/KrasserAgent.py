@@ -34,8 +34,17 @@ class Point:
             case Orientation.WEST:
                 self.x -= step
 
+
+class UturnPhase(IntEnum):
+    NONE, FIRST_TURN, GO = 0, 1, 2
+
+
 class KrasserAgent(Agent):
     def __init__(self):
+        # Used for snake
+        self.uturn = UturnPhase.NONE
+        self.old_orientation = Orientation.NORTH
+
         self.position = Point()
         self.home = Point()
         self.orientation = Orientation.SOUTH
@@ -102,16 +111,33 @@ class KrasserAgent(Agent):
             if self.position.x > 0:
                 ## DO Stuff
 
-        if "BUMP" in percepts:
+        if "BUMP" in percepts and self.bump_counter < 2:
+            # Initialization mode
             self.undo_move()
             if self.bump_counter < 2:
                 self.bump_counter += 1
-            if self.bump_counter == 2:
-                print("FOUND CORNER")
-                self.go_home = True
             return self.turn_right()
+
+        if "BUMP" in percepts and self.bump_counter == 2:
+            # Snake mode
+            self.undo_move()
+            self.old_orientation = self.orientation
+            self.uturn = UturnPhase.FIRST_TURN
+            if self.old_orientation == Orientation.NORTH or self.old_orientation == Orientation.EAST:
+                return self.turn_right()
+            return self.turn_left()
 
         if "DIRT" in percepts:
             return self.suck()
+
+        if self.uturn == UturnPhase.FIRST_TURN:
+            self.uturn = UturnPhase.GO
+            return self.go()
+
+        if self.uturn == UturnPhase.GO:
+            self.uturn = UturnPhase.NONE
+            if self.old_orientation == Orientation.NORTH or self.old_orientation == Orientation.EAST:
+                return self.turn_right()
+            return self.turn_left()
 
         return self.go()
