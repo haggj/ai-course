@@ -52,6 +52,10 @@ class KrasserAgent(Agent):
         self.visited = {self.home}
         self.bump_counter = 0
         self.go_home = False
+        self.count_cells = False
+        self.max_cells = 0
+        self.cell_counter = 0
+        self.total_bumps = 0
 
     # this method is called on the start of the new environment
     def start(self):
@@ -68,6 +72,11 @@ class KrasserAgent(Agent):
         self.visited = {self.home}
         self.bump_counter = 0
         self.go_home = False
+        self.count_cells = False
+        self.max_cells = 0
+        self.cell_counter = 0
+        print("Agent has bumpt a total of only: " , self.total_bumps)
+        self.total_bumps = 0
 
     def turn_on(self):
         self.turned_on = True
@@ -103,6 +112,9 @@ class KrasserAgent(Agent):
         print("next_action called")
         if not self.turned_on:
             return self.turn_on()
+
+        if "BUMP" in percepts:
+            self.total_bumps += 1
 
         if self.go_home == True:
             if self.position.__eq__(self.home):
@@ -146,11 +158,19 @@ class KrasserAgent(Agent):
             self.undo_move()
             if self.bump_counter < 2:
                 self.bump_counter += 1
+                if self.bump_counter == 2:
+                    self.count_cells = True
             return self.turn_right()
 
         if "BUMP" in percepts and self.bump_counter == 2:
-            # Snake mode
+            self.count_cells = False
+            self.max_cells -= 1
+            self.cell_counter = self.max_cells
             self.undo_move()
+
+        if self.bump_counter == 2 and self.count_cells == False and self.cell_counter == self.max_cells:
+            self.cell_counter = 0
+            # Snake mode
             if self.uturn == UturnPhase.GO:
                 self.go_home = True
             self.old_orientation = self.orientation
@@ -172,4 +192,7 @@ class KrasserAgent(Agent):
                 return self.turn_right()
             return self.turn_left()
 
+        if self.bump_counter == 2 and self.count_cells == True:
+            self.max_cells += 1
+        self.cell_counter += 1
         return self.go()
