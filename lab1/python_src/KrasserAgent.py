@@ -112,24 +112,32 @@ class KrasserAgent(Agent):
                 """ NEED TO MOVE WEST """
                 if self.orientation == Orientation.WEST:
                     return self.go()
+                elif self.orientation - Orientation.WEST > 0:
+                    return self.turn_left()
                 else:
                     return self.turn_right()
             elif self.position.x < 0:
                 """ NEED TO MOVE EAST """
                 if self.orientation == Orientation.EAST:
                     return self.go()
+                elif self.orientation - Orientation.EAST > 0:
+                    return self.turn_left()
                 else:
                     return self.turn_right()
             elif self.position.x == 0 and self.position.y > 0:
                 """ NEED TO MOVE SOUTH """
                 if self.orientation == Orientation.SOUTH:
                     return self.go()
+                elif self.orientation - Orientation.SOUTH > 0:
+                    return self.turn_left()
                 else:
                     return self.turn_right()
             elif self.position.x == 0 and self.position.y < 0:
                 """ NEED TO MOVE NORTH """
                 if self.orientation == Orientation.NORTH:
                     return self.go()
+                elif self.orientation - Orientation.NORTH > 0:
+                    return self.turn_left()
                 else:
                     return self.turn_right()
 
