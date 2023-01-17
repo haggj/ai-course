@@ -1,6 +1,7 @@
 from enum import IntEnum
 import random
 import itertools
+import math
 
 ##############
 
@@ -109,4 +110,4 @@ class Environment:
 
 def expected_number_of_states(width, height, nb_dirts):
   # TODO: return a reasonable upper bound on number of possible states
-  return 2
+  return 2*width*height*4*math.factorial(width*height)/math.factorial(width*height-nb_dirts)
