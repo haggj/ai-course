@@ -27,12 +27,13 @@ class State:
 
   # TODO: add other attributes that store necessary information about a state of the environment
   #       Only information that can change over time should be kept here.
-  turned_on = False
 
-  def __init__(self, turned_on):
+  def __init__(self, turned_on=False, position=(0,0), dirts_left=[], orientation=Orientation.NORTH):
   # TODO: add other attributes that store necessary information about a state of the environment
     self.turned_on = turned_on
-    return
+    self.position = position
+    self.dirts_left  = dirts_left
+    self.orientation = orientation
 
   def __str__(self):
     # TODO: modify as needed
