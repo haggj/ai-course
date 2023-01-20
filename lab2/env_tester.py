@@ -4,6 +4,8 @@ import argparse
 import random
 import sys
 import time
+import json
+import collections
 
 import pysize
 
@@ -100,6 +102,8 @@ def main(argv):
   if expected_nb_states < len(states): # not all states were generated
     return
   goal_states = list(filter(lambda x: env.is_goal_state(x), states))
+  for x in goal_states:
+    print(x)
   print("The environment has %d reachable states of which %d are goal states." % (len(states), len(goal_states)))
   if expected_nb_states > len(states): # not all states were generated
     factor_off = expected_nb_states / len(states)
@@ -123,7 +127,7 @@ def main(argv):
   nb_errors = 0
   if len(states2) != len(states):
     nb_errors += 1
-    print("ERROR: reachable state set is not deterministic")
+    print(f"ERROR: reachable state set is not deterministic ({len(states)} <-> {len(states2)})")
   dict1 = {state:1 for state in states}
   for state in states2:
     if state not in dict1:
@@ -136,6 +140,11 @@ def main(argv):
   print()
   nb_states = len(states)
   hashes = [hash(state) for state in states]
+  debug = [(hash(state), str(state)) for state in states]
+
+  #for d in sorted(debug):
+  #  print(d)
+
   nb_unique_hashes = len(set(hashes))
   print("%d unique hashes (%.1f%% hash collisions)" % (nb_unique_hashes, 100*(1-nb_unique_hashes/nb_states)))
   # The computation of the hash indices is based on the fact that the size of a dict is a power of 2

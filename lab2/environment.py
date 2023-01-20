@@ -75,12 +75,12 @@ class Environment:
     self.home = random.choice(self.all_positions)
     # randomly choose locations for dirt
     self.dirts = random.sample(self.all_positions, nb_dirts)
+    self.initial_orientation = random.choice([Orientation.NORTH, Orientation.SOUTH, Orientation.WEST, Orientation.EAST])
 
   def get_initial_state(self):
     # TODO (DONE): return the initial state of the environment
-    random_orientation = random.choice([Orientation.NORTH, Orientation.SOUTH, Orientation.WEST, Orientation.EAST])
     # return State(False, position=(0,0), dirts_left=self.dirts, orientation=Orientation.WEST)
-    return State(False, position=self.home, dirts_left=self.dirts, orientation=random_orientation)
+    return  State(False, position=self.home, dirts_left=[x for x in self.dirts], orientation=self.initial_orientation)
 
   def will_bump(self, state: State):
     if state.orientation == Orientation.NORTH:
@@ -98,9 +98,9 @@ class Environment:
     if not state.turned_on:
       actions.append("TURN_ON")
     else:
-      if state.position == self.home and self.dirts == []: # should be only possible when agent has returned home
+      if state.position == self.home and state.dirts_left == []: # should be only possible when agent has returned home
         actions.append("TURN_OFF")
-      if state.position in self.dirts: # should be only possible if there is dirt in the current position
+      if state.position in state.dirts_left: # should be only possible if there is dirt in the current position
         actions.append("SUCK")
       if not self.will_bump(state): # should be only possible when next position is inside the grid (avoid bumping in walls)
         actions.append("GO")
