@@ -110,7 +110,7 @@ class Environment:
     return actions
 
   def get_next_state(self, state: State, action):
-    # TODO: add missing actions
+    # TODO (DONE): add missing actions
     if action == "TURN_ON":
       return State(True,state.position, copy.deepcopy(state.dirts_left), state.orientation)
 
@@ -161,4 +161,7 @@ class Environment:
 
 def expected_number_of_states(width, height, nb_dirts):
   # TODO (DONE): return a reasonable upper bound on number of possible states
-  return 2*width*height*4*math.factorial(width*height)/math.factorial(width*height-nb_dirts)
+  sum = 0
+  for n in range(nb_dirts+1):
+    sum += math.factorial(width*height)/math.factorial(width*height-n)
+  return 2*width*height*4*sum
