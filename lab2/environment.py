@@ -3,6 +3,7 @@ import random
 import itertools
 import math
 import hashlib
+import copy
 
 ##############
 
@@ -80,15 +81,15 @@ class Environment:
   def get_initial_state(self):
     # TODO (DONE): return the initial state of the environment
     # return State(False, position=(0,0), dirts_left=self.dirts, orientation=Orientation.WEST)
-    return  State(False, position=self.home, dirts_left=[x for x in self.dirts], orientation=self.initial_orientation)
+    return  State(False, position=self.home, dirts_left=copy.deepcopy(self.dirts), orientation=self.initial_orientation)
 
   def will_bump(self, state: State):
     if state.orientation == Orientation.NORTH:
       return self._height == state.position[1]
     elif state.orientation == Orientation.SOUTH:
-      return 0 == state.position[1]
+      return 1 == state.position[1]
     elif state.orientation == Orientation.WEST:
-      return 0 == state.position[0]    
+      return 1 == state.position[0]    
     else:
       return self._width == state.position[0]
 
@@ -111,15 +112,16 @@ class Environment:
   def get_next_state(self, state: State, action):
     # TODO: add missing actions
     if action == "TURN_ON":
-      return State(True,state.position, state.dirts_left, state.orientation)
+      return State(True,state.position, copy.deepcopy(state.dirts_left), state.orientation)
 
     elif action == "TURN_OFF":
-      return State(False,state.position, state.dirts_left, state.orientation)
+      return State(False,state.position, copy.deepcopy(state.dirts_left), state.orientation)
 
     elif action == "SUCK":
       if state.position in state.dirts_left:
-        state.dirts_left.remove(state.position)
-      return State(state.turned_on, state.position, state.dirts_left, state.orientation)
+        new_dirts = copy.deepcopy(state.dirts_left)
+        new_dirts.remove(state.position)
+      return State(state.turned_on, state.position, new_dirts, state.orientation)
 
     elif action == "GO":
       new_position = None
@@ -131,13 +133,13 @@ class Environment:
         new_position = (state.position[0]-1, state.position[1])
       elif state.orientation == Orientation.EAST:
         new_position = (state.position[0]+1, state.position[1])
-      return State(state.turned_on, new_position, state.dirts_left, state.orientation) 
+      return State(state.turned_on, new_position, copy.deepcopy(state.dirts_left), state.orientation) 
 
     elif action == "TURN_LEFT":
-     return State(state.turned_on, state.position, state.dirts_left, state.orientation-1)
+     return State(state.turned_on, state.position, copy.deepcopy(state.dirts_left), state.orientation-1)
 
     elif action == "TURN_RIGHT":
-      return State(state.turned_on, state.position, state.dirts_left, state.orientation+1)
+      return State(state.turned_on, state.position, copy.deepcopy(state.dirts_left), state.orientation+1)
 
     else:
       raise Exception("Unknown action %s" % str(action))

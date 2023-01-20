@@ -22,6 +22,12 @@ def bfs_traverse(env, expected_nb_states):
   open_list = [state]
   while len(open_list)>0:
     if len(visited) > expected_nb_states:
+      print(len(visited))
+      for s in visited:
+        print(s)
+        print(visited[s])
+        
+
       print("ERROR: generating more states than expected!")
       print("Either identical states are not detected or the expected number is wrong.")
       print("Stopping state generation before all states are found!\n")
@@ -102,8 +108,6 @@ def main(argv):
   if expected_nb_states < len(states): # not all states were generated
     return
   goal_states = list(filter(lambda x: env.is_goal_state(x), states))
-  for x in goal_states:
-    print(x)
   print("The environment has %d reachable states of which %d are goal states." % (len(states), len(goal_states)))
   if expected_nb_states > len(states): # not all states were generated
     factor_off = expected_nb_states / len(states)
