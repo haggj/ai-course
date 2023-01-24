@@ -1,4 +1,5 @@
 import collections
+from queue import PriorityQueue
 
 ######################
 
@@ -99,6 +100,46 @@ class AStarSearch(SearchAlgorithm):
 		# - max_frontier_size should be the largest size of the frontier observed during the search measured in number of nodes
 		# Once a goal node has been found, set the goal_node variable to it, this should take care of get_plan() and get_plan_cost() below,
 		# as long as the node contains the right information.
+
+def do_search(self, env):
+		self.heuristics.init(env)
+		self.nb_node_expansions = 0
+		self.max_frontier_size = 0
+		self.goal_node = None
+
+		# Create a priority queue for the frontier
+		frontier = PriorityQueue()
+
+		# Create the start node and add it to the frontier
+		start_node = Node(env.get_start_state(), None, None, 0)
+		frontier.put(start_node)
+
+		# Create a set to keep track of the explored states
+		explored = set()
+
+		while not frontier.empty():
+			# Get the node with the lowest value from the frontier
+			current_node = frontier.get()
+
+			# Check if the current node is the goal state
+			if env.is_goal(current_node.state):
+				self.goal_node = current_node
+				break
+
+			# Mark the current state as explored
+			explored.add(current_node.state)
+
+			# Expand the current node and add the resulting nodes to the frontier
+			for action, next_state, cost in env.get_successors(current_node.state):
+				if next_state not in explored:
+					# Compute the value of the node using the heuristic function
+					value = current_node.cost + cost + self.heuristics.get(next_state)
+
+					# Create the new node and add it to the frontier
+					new_node = Node(next_state, current_node, action, value)
+					frontier.put(new_node)
+					self.nb_node_expansions += 1
+					self.max_frontier_size = max(self.max_frontier_size, frontier.qsize())
 
 		return
 
