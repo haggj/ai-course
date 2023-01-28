@@ -126,17 +126,27 @@ class AStarSearch(SearchAlgorithm):
             for action in env.get_legal_actions(current_node.state):
                 next_state = env.get_next_state(current_node.state, action)
                 cost = env.get_cost(current_node.state, action)
+                # Compute the value of the node using the heuristic function
+                value = current_node.value + cost + self.heuristics.eval(next_state)
 
-                if next_state not in explored:
-                    # Compute the value of the node using the heuristic function
-                    value = current_node.value + cost + self.heuristics.eval(next_state)
+                if next_state in explored:
+                    continue
 
-                    # Create the new node and add it to the frontier
-                    new_node = Node(value, current_node, next_state, action)
-                    frontier.put(new_node)
-                    self.nb_node_expansions += 1
-                    print(self.heuristics.eval(next_state))
-                    self.max_frontier_size = max(self.max_frontier_size, frontier.qsize())
+                existing = next(filter(lambda node: node.state == next_state, frontier.queue), None)
+                if existing:
+                    # state is already in queue, check if we found a better path
+                    if existing.value <= cost:
+                        # detected path is more expensive -> drop
+                        continue
+                    else:
+                        frontier.queue.remove(existing)
+
+                # Create the new node and add it to the frontier
+                new_node = Node(value, current_node, next_state, action)
+                frontier.put(new_node)
+                self.nb_node_expansions += 1
+                print(self.heuristics.eval(next_state))
+                self.max_frontier_size = max(self.max_frontier_size, frontier.qsize())
 
     def get_plan(self):
         if not self.goal_node:
