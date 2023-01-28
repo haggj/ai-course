@@ -1,4 +1,5 @@
 import collections
+import time
 from queue import PriorityQueue
 
 from environment import Environment
@@ -110,6 +111,10 @@ class AStarSearch(SearchAlgorithm):
         # Create a set to keep track of the explored states
         explored = set()
 
+        cached_costs = dict()
+
+        start = time.time()
+
         while not frontier.empty():
             # Get the node with the lowest value from the frontier
             current_node = frontier.get()
@@ -132,21 +137,27 @@ class AStarSearch(SearchAlgorithm):
                 if next_state in explored:
                     continue
 
-                existing = next(filter(lambda node: node.state == next_state, frontier.queue), None)
-                if existing:
+                if next_state in cached_costs:
                     # state is already in queue, check if we found a better path
-                    if existing.value <= cost:
+                    if cached_costs[next_state].value <= cost:
                         # detected path is more expensive -> drop
                         continue
                     else:
-                        frontier.queue.remove(existing)
+                        frontier.queue.remove(cached_costs[next_state])
 
                 # Create the new node and add it to the frontier
                 new_node = Node(value, current_node, next_state, action)
                 frontier.put(new_node)
+                cached_costs[new_node.state] = new_node
                 self.nb_node_expansions += 1
-                print(self.heuristics.eval(next_state))
+                if self.nb_node_expansions % 50000 == 0:
+                    print(self.nb_node_expansions)
                 self.max_frontier_size = max(self.max_frontier_size, frontier.qsize())
+
+        end = time.time()
+        print(f"Took {end-start}s to expand {self.nb_node_expansions} nodes.")
+        print(f"Maximal frontier size: {self.max_frontier_size}.\n\n\n")
+
 
     def get_plan(self):
         if not self.goal_node:
