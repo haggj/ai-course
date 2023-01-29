@@ -104,15 +104,24 @@ class AStarSearch(SearchAlgorithm):
         frontier = PriorityQueue()
 
         # Create the start node and add it to the frontier
-        start_node = Node(0, None, env.get_current_state(), None)
+        start_node = Node(self.heuristics.eval(env.get_current_state()), None, env.get_current_state(), None)
         frontier.put(start_node)
 
         # Create a set to keep track of the explored states
         explored = set()
 
-        while not frontier.empty():
+        # Create a dictionary to keep track of states that are in the frontier
+        states_in_frontier = {}
+        states_in_frontier[start_node.state] = start_node.value
+
+        counter = 0
+        #while not frontier.empty():
+        while frontier:
             # Get the node with the lowest value from the frontier
             current_node = frontier.get()
+
+            if current_node.state in explored:
+                continue
 
             # Check if the current node is the goal state
             if env.is_goal_state(current_node.state):
@@ -125,18 +134,28 @@ class AStarSearch(SearchAlgorithm):
             # Expand the current node and add the resulting nodes to the frontier
             for action in env.get_legal_actions(current_node.state):
                 next_state = env.get_next_state(current_node.state, action)
-                cost = env.get_cost(current_node.state, action)
 
                 if next_state not in explored:
                     # Compute the value of the node using the heuristic function
+                    cost = env.get_cost(current_node.state, action)
                     value = current_node.value + cost + self.heuristics.eval(next_state)
+
+                    # Check if this state already exits in frontier
+                    if next_state in states_in_frontier and value > states_in_frontier[next_state]:
+                        # State with less cost already exits
+                        continue
 
                     # Create the new node and add it to the frontier
                     new_node = Node(value, current_node, next_state, action)
+
                     frontier.put(new_node)
+                    states_in_frontier[new_node.state] = new_node.value
                     self.nb_node_expansions += 1
-                    print(self.heuristics.eval(next_state))
                     self.max_frontier_size = max(self.max_frontier_size, frontier.qsize())
+                    if counter == 10000:
+                        print(self.heuristics.eval(next_state))
+                        counter = 0
+                    counter += 1
 
     def get_plan(self):
         if not self.goal_node:
