@@ -43,6 +43,47 @@ class SimpleHeuristics(Heuristics):
         return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
 
+class KrassereHeuristics(Heuristics):
+
+    def eval(self, s):
+        h = 0
+        # if there is dirt: max of { manhattan distance to dirt + manhattan distance from dirt to home }
+        # else manhattan distance to home
+        if len(s.dirts) == 0:
+            h = self.nb_steps(s.position, self.env.home)
+        else:
+
+            # Finding the closest dirt
+            close_dirt = None
+            steps_close_dirt = None
+            for d in s.dirts:
+                steps = self.nb_steps(s.position, d)
+                if not steps_close_dirt or steps_close_dirt > steps:
+                    steps_close_dirt = steps
+                    close_dirt = d
+
+            # Finding the furthest dirt
+            far_dirt = None
+            steps_far_dirt = None
+            for d in s.dirts:
+                steps = self.nb_steps(close_dirt, d)
+                if not steps_far_dirt or steps_far_dirt < steps:
+                    steps_far_dirt = steps
+                    far_dirt = d
+
+            h = self.nb_steps(s.position, close_dirt) + self.nb_steps(close_dirt,
+                                                                      far_dirt) + self.nb_steps(
+                far_dirt, self.env.home)
+            h += len(s.dirts)  # sucking up all the dirt
+
+        if s.turned_on:
+            h += 1  # to turn off
+        return h
+
+    # estimates the number of steps between locations a and b by Manhattan distance
+    def nb_steps(self, a, b):
+        return abs(a[0] - b[0]) + abs(a[1] - b[1])
+
 ######################
 
 class SearchAlgorithm:
