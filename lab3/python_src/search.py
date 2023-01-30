@@ -1,5 +1,6 @@
 import collections
 import time
+from copy import deepcopy
 from queue import PriorityQueue
 
 from environment import Environment
@@ -54,30 +55,26 @@ class KrassereHeuristics(Heuristics):
             h = self.nb_steps(s.position, self.env.home)
         else:
 
-            # Finding the closest dirt
-            close_dirt = None
-            steps_close_dirt = None
-            for d in s.dirts:
-                steps = self.nb_steps(s.position, d)
-                if not steps_close_dirt or steps_close_dirt > steps:
-                    steps_close_dirt = steps
-                    close_dirt = d
+            move_order = [s.position]
+            dirt_help_list = list(deepcopy(s.dirts))
+            for dirt in s.dirts:
+                next_dirt = None
+                steps_next_dirt = None
+                for d in dirt_help_list:
+                    steps = self.nb_steps(move_order[(len(move_order) - 1)], d)
+                    if not steps_next_dirt or steps_next_dirt > steps:
+                        steps_next_dirt = steps
+                        next_dirt = d
+                move_order.append(next_dirt)
+                dirt_help_list.remove(next_dirt)
 
-            # Finding the furthest dirt
-            far_dirt = None
-            steps_far_dirt = None
-            for d in s.dirts:
-                steps = self.nb_steps(close_dirt, d)
-                if not steps_far_dirt or steps_far_dirt < steps:
-                    steps_far_dirt = steps
-                    far_dirt = d
+            move_order.append(self.env.home)
 
+            total_steps = 0
+            for i in range(len(move_order) - 1):
+                total_steps += self.nb_steps(move_order[i], move_order[i+1])
 
-            steps1 = self.nb_steps(s.position, close_dirt)
-            steps2 = self.nb_steps(close_dirt, far_dirt)
-            steps3 = self.nb_steps(far_dirt, self.env.home)
-            h = steps1 + steps2 + steps3
-            h += len(s.dirts)  # sucking up all the dirt
+            h = total_steps + len(s.dirts)  # sucking up all the dirt
 
         if s.turned_on:
             h += 1  # to turn off
