@@ -82,7 +82,7 @@ class SearchAlgorithm:
 #  - state: the state belonging to this node
 #  - action: the action that was executed to get to this node (or None in case of the root node)
 
-Node = collections.namedtuple('Node', ['value', 'parent', 'state', 'action'])
+Node = collections.namedtuple('Node', ['value', 'costs', 'parent', 'state', 'action'])
 
 
 ######################
@@ -105,7 +105,7 @@ class AStarSearch(SearchAlgorithm):
         frontier = PriorityQueue()
 
         # Create the start node and add it to the frontier
-        start_node = Node(0, None, env.get_current_state(), None)
+        start_node = Node(0, 0, None, env.get_current_state(), None)
         frontier.put(start_node)
 
         # Create a set to keep track of the explored states
@@ -130,23 +130,24 @@ class AStarSearch(SearchAlgorithm):
             # Expand the current node and add the resulting nodes to the frontier
             for action in env.get_legal_actions(current_node.state):
                 next_state = env.get_next_state(current_node.state, action)
-                cost = env.get_cost(current_node.state, action)
-                # Compute the value of the node using the heuristic function
-                value = current_node.value + cost + self.heuristics.eval(next_state)
+
+                next_cost_g = current_node.costs + env.get_cost(current_node.state, action)
+                next_cost_h = self.heuristics.eval(next_state)
+                next_cost_f = next_cost_g + next_cost_h
 
                 if next_state in explored:
                     continue
 
                 if next_state in cached_costs:
                     # state is already in queue, check if we found a better path
-                    if cached_costs[next_state].value <= cost:
+                    if cached_costs[next_state].value <= next_cost_f:
                         # detected path is more expensive -> drop
                         continue
                     else:
                         frontier.queue.remove(cached_costs[next_state])
 
                 # Create the new node and add it to the frontier
-                new_node = Node(value, current_node, next_state, action)
+                new_node = Node(next_cost_f, next_cost_g, current_node, next_state, action)
                 frontier.put(new_node)
                 cached_costs[new_node.state] = new_node
                 self.nb_node_expansions += 1
