@@ -72,9 +72,11 @@ class KrassereHeuristics(Heuristics):
                     steps_far_dirt = steps
                     far_dirt = d
 
-            h = self.nb_steps(s.position, close_dirt) + self.nb_steps(close_dirt,
-                                                                      far_dirt) + self.nb_steps(
-                far_dirt, self.env.home)
+
+            steps1 = self.nb_steps(s.position, close_dirt)
+            steps2 = self.nb_steps(close_dirt, far_dirt)
+            steps3 = self.nb_steps(far_dirt, self.env.home)
+            h = steps1 + steps2 + steps3
             h += len(s.dirts)  # sucking up all the dirt
 
         if s.turned_on:
