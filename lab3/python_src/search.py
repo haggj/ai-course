@@ -1,4 +1,6 @@
 import collections
+import time
+from copy import deepcopy
 from queue import PriorityQueue
 
 from environment import Environment
@@ -53,28 +55,26 @@ class KrassereHeuristics(Heuristics):
             h = self.nb_steps(s.position, self.env.home)
         else:
 
-            # Finding the closest dirt
-            close_dirt = None
-            steps_close_dirt = None
-            for d in s.dirts:
-                steps = self.nb_steps(s.position, d)
-                if not steps_close_dirt or steps_close_dirt > steps:
-                    steps_close_dirt = steps
-                    close_dirt = d
+            move_order = [s.position]
+            dirt_help_list = list(deepcopy(s.dirts))
+            for dirt in s.dirts:
+                next_dirt = None
+                steps_next_dirt = None
+                for d in dirt_help_list:
+                    steps = self.nb_steps(move_order[(len(move_order) - 1)], d)
+                    if not steps_next_dirt or steps_next_dirt > steps:
+                        steps_next_dirt = steps
+                        next_dirt = d
+                move_order.append(next_dirt)
+                dirt_help_list.remove(next_dirt)
 
-            # Finding the furthest dirt
-            far_dirt = None
-            steps_far_dirt = None
-            for d in s.dirts:
-                steps = self.nb_steps(close_dirt, d)
-                if not steps_far_dirt or steps_far_dirt < steps:
-                    steps_far_dirt = steps
-                    far_dirt = d
+            move_order.append(self.env.home)
 
-            h = self.nb_steps(s.position, close_dirt) + self.nb_steps(close_dirt,
-                                                                      far_dirt) + self.nb_steps(
-                far_dirt, self.env.home)
-            h += len(s.dirts)  # sucking up all the dirt
+            total_steps = 0
+            for i in range(len(move_order) - 1):
+                total_steps += self.nb_steps(move_order[i], move_order[i+1])
+
+            h = total_steps + len(s.dirts)  # sucking up all the dirt
 
         if s.turned_on:
             h += 1  # to turn off
@@ -122,7 +122,7 @@ class SearchAlgorithm:
 #  - state: the state belonging to this node
 #  - action: the action that was executed to get to this node (or None in case of the root node)
 
-Node = collections.namedtuple('Node', ['value', 'parent', 'state', 'action'])
+Node = collections.namedtuple('Node', ['value', 'costs', 'parent', 'state', 'action'])
 
 
 ######################
@@ -145,24 +145,19 @@ class AStarSearch(SearchAlgorithm):
         frontier = PriorityQueue()
 
         # Create the start node and add it to the frontier
-        start_node = Node(0, None, env.get_current_state(), None)
+        start_node = Node(0, 0, None, env.get_current_state(), None)
         frontier.put(start_node)
 
         # Create a set to keep track of the explored states
         explored = set()
 
-        # Create a dictionary to keep track of states that are in the frontier
-        states_in_frontier = {}
-        states_in_frontier[start_node.state] = start_node.value
+        cached_costs = dict()
 
-        counter = 0
-        #while not frontier.empty():
-        while frontier:
+        start = time.time()
+
+        while not frontier.empty():
             # Get the node with the lowest value from the frontier
             current_node = frontier.get()
-
-            if current_node.state in explored:
-                continue
 
             # Check if the current node is the goal state
             if env.is_goal_state(current_node.state):
@@ -176,27 +171,34 @@ class AStarSearch(SearchAlgorithm):
             for action in env.get_legal_actions(current_node.state):
                 next_state = env.get_next_state(current_node.state, action)
 
-                if next_state not in explored:
-                    # Compute the value of the node using the heuristic function
-                    cost = env.get_cost(current_node.state, action)
-                    value = current_node.value + cost + self.heuristics.eval(next_state)
+                next_cost_g = current_node.costs + env.get_cost(current_node.state, action)
+                next_cost_h = self.heuristics.eval(next_state)
+                next_cost_f = next_cost_g + next_cost_h
 
-                    # Check if this state already exits in frontier
-                    if next_state in states_in_frontier and value > states_in_frontier[next_state]:
-                        # State with less cost already exits
+                if next_state in explored:
+                    continue
+
+                if next_state in cached_costs:
+                    # state is already in queue, check if we found a better path
+                    if cached_costs[next_state].value <= next_cost_f:
+                        # detected path is more expensive -> drop
                         continue
+                    else:
+                        frontier.queue.remove(cached_costs[next_state])
 
-                    # Create the new node and add it to the frontier
-                    new_node = Node(value, current_node, next_state, action)
+                # Create the new node and add it to the frontier
+                new_node = Node(next_cost_f, next_cost_g, current_node, next_state, action)
+                frontier.put(new_node)
+                cached_costs[new_node.state] = new_node
+                self.nb_node_expansions += 1
+                if self.nb_node_expansions % 50000 == 0:
+                    print(self.nb_node_expansions)
+                self.max_frontier_size = max(self.max_frontier_size, frontier.qsize())
 
-                    frontier.put(new_node)
-                    states_in_frontier[new_node.state] = new_node.value
-                    self.nb_node_expansions += 1
-                    self.max_frontier_size = max(self.max_frontier_size, frontier.qsize())
-                    if counter == 10000:
-                        print(self.heuristics.eval(next_state))
-                        counter = 0
-                    counter += 1
+        end = time.time()
+        print(f"Took {end-start}s to expand {self.nb_node_expansions} nodes.")
+        print(f"Maximal frontier size: {self.max_frontier_size}.\n\n\n")
+
 
     def get_plan(self):
         if not self.goal_node:
