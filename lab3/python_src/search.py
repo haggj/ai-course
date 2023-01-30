@@ -104,7 +104,7 @@ class AStarSearch(SearchAlgorithm):
         frontier = PriorityQueue()
 
         # Create the start node and add it to the frontier
-        start_node = Node(self.heuristics.eval(env.get_current_state()), None, env.get_current_state(), None)
+        start_node = Node(0, None, env.get_current_state(), None)
         frontier.put(start_node)
 
         # Create a set to keep track of the explored states
