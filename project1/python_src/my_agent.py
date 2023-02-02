@@ -61,7 +61,7 @@ class MyAgent(RandomAgent):
 
     def cleanup(self, last_move):
         self.game_terminated = True
-        test = self.get_state_value(self.env.current_state, [])
+        # test = self.get_state_value(self.env.current_state, [])
         print("cleanup called")
         return
 
@@ -72,28 +72,28 @@ class MyAgent(RandomAgent):
         raise ValueError("{!r} is not in list".format(search))
 
     def get_state_value(self, state, nr_legal_moves):
-        if self.game_terminated:
-            if state.white_turn and self.role == "white":
-                return 100
-            elif state.white_turn == False and self.role != "white":
-                return 100
-            else:
-                return -100
-        elif nr_legal_moves == 0:
-            return 0
-        else:
+        # if self.game_terminated:
+        #     if state.white_turn and self.role == "white":
+        #         return 100
+        #     elif state.white_turn == False and self.role != "white":
+        #         return 100
+        #     else:
+        #         return -100
+        # elif nr_legal_moves == 0:
+        #     return 0
+        # else:
             distance_black = self.index_2d(state.board,BLACK)
             distance_white = self.index_2d(state.board[::-1],WHITE)
-            # if distance_black == 0:
-            #     if self.role == "white":
-            #         return -100
-            #     else:
-            #         return 100
-            # if distance_white == 0:
-            #     if self.role == "white":
-            #         return 100
-            #     else:
-            #         return -100
+            if distance_black == 0:
+                if self.role == "white":
+                    return -100
+                else:
+                    return 100
+            if distance_white == 0:
+                if self.role == "white":
+                    return 100
+                else:
+                    return -100
             if self.role == "white":
                 return distance_black-distance_white
             else:
