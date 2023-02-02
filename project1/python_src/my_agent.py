@@ -1,6 +1,7 @@
 import random
 from agent import RandomAgent
 from environment import Environment
+from minimax import MiniMax
 
 BLACK, WHITE, EMPTY = "B", "W", " "
 
@@ -57,7 +58,10 @@ class MyAgent(RandomAgent):
     def get_best_move(self):
         legal_moves = self.env.get_legal_moves(self.env.current_state)
         test = self.get_state_value(self.env.current_state, len(legal_moves))
-        return random.choice(legal_moves)
+
+        minimax = MiniMax(self.env, self.get_state_value)
+        res = minimax.run()
+        return res
 
     def cleanup(self, last_move):
         self.game_terminated = True

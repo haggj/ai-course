@@ -5,7 +5,7 @@ environment.
 Usage: gameplayer.py [port]
 Example: gameplayer.py 4001
 """
-
+import os
 from http.server import HTTPServer, BaseHTTPRequestHandler
 import re
 import sys
@@ -139,7 +139,7 @@ def main():
     agent = MyAgent()
 
     # read command line argument(s)
-    port = 4001
+    port = int(os.getenv('GAMEPLAYER_PORT', 4001))
     if len(sys.argv) == 2:
         try:
             port = int(sys.argv[1])
