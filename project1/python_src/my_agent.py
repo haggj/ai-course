@@ -2,6 +2,8 @@ import random
 from agent import RandomAgent
 from environment import Environment
 
+BLACK, WHITE, EMPTY = "B", "W", " "
+
 class MyAgent(RandomAgent):
     def __init__(self):
         self.role = None
@@ -11,10 +13,12 @@ class MyAgent(RandomAgent):
         self.height = 0
         self.env = None
         self.last_move = None
+        self.game_terminated = False
 
     # start() is called once before you have to select the first action. Use it to initialize the agent.
     # role is either "white" or "black" and play_clock is the number of seconds after which nextAction must return.
     def start(self, role, width, height, play_clock):
+        self.game_terminated = False
         self.play_clock = play_clock
         self.role = role
         self.my_turn = role != 'white'
@@ -52,4 +56,45 @@ class MyAgent(RandomAgent):
 
     def get_best_move(self):
         legal_moves = self.env.get_legal_moves(self.env.current_state)
+        test = self.get_state_value(self.env.current_state, len(legal_moves))
         return random.choice(legal_moves)
+
+    def cleanup(self, last_move):
+        self.game_terminated = True
+        test = self.get_state_value(self.env.current_state, [])
+        print("cleanup called")
+        return
+
+    def index_2d(self, data, search):
+        for i in range(len(data)):
+            if search in data[i]:
+                return i
+        raise ValueError("{!r} is not in list".format(search))
+
+    def get_state_value(self, state, nr_legal_moves):
+        if self.game_terminated:
+            if state.white_turn and self.role == "white":
+                return 100
+            elif state.white_turn == False and self.role != "white":
+                return 100
+            else:
+                return -100
+        elif nr_legal_moves == 0:
+            return 0
+        else:
+            distance_black = self.index_2d(state.board,BLACK)
+            distance_white = self.index_2d(state.board[::-1],WHITE)
+            # if distance_black == 0:
+            #     if self.role == "white":
+            #         return -100
+            #     else:
+            #         return 100
+            # if distance_white == 0:
+            #     if self.role == "white":
+            #         return 100
+            #     else:
+            #         return -100
+            if self.role == "white":
+                return distance_black-distance_white
+            else:
+                return distance_white-distance_black
