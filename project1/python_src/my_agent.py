@@ -57,7 +57,6 @@ class MyAgent(RandomAgent):
 
     def get_best_move(self):
         legal_moves = self.env.get_legal_moves(self.env.current_state)
-        test = self.get_state_value(self.env.current_state, len(legal_moves))
 
         minimax = MiniMax(self.env, self.get_state_value)
         res = minimax.run()
