@@ -74,30 +74,5 @@ class MyAgent(RandomAgent):
                 return i
         raise ValueError("{!r} is not in list".format(search))
 
-    def get_state_value(self, state, nr_legal_moves):
-        # if self.game_terminated:
-        #     if state.white_turn and self.role == "white":
-        #         return 100
-        #     elif state.white_turn == False and self.role != "white":
-        #         return 100
-        #     else:
-        #         return -100
-        # elif nr_legal_moves == 0:
-        #     return 0
-        # else:
-            distance_black = self.index_2d(state.board,BLACK)
-            distance_white = self.index_2d(state.board[::-1],WHITE)
-            if distance_black == 0:
-                if self.role == "white":
-                    return -100
-                else:
-                    return 100
-            if distance_white == 0:
-                if self.role == "white":
-                    return 100
-                else:
-                    return -100
-            if self.role == "white":
-                return distance_black-distance_white
-            else:
-                return distance_white-distance_black
+    def get_state_value(self, state):
+        return state.get_state_value()
