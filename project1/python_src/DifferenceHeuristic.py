@@ -12,7 +12,7 @@ class DifferenceHeuristic:
             return -100
         if distance_white == 0:
             return 100
-        return distance_black * 10
+        return distance_black-distance_white
 
     @staticmethod
     def index_2d(data, search):

@@ -12,7 +12,7 @@ Entry = collections.namedtuple('Entry', ['value', 'flag', 'depth'])
 
 
 class MiniMax:
-    """Minimax with iterative deepening"""
+    """Minimax/Negamax with iterative deepening"""
 
     def __init__(self, env: Environment, role, play_clock):
         self.env = env
@@ -111,37 +111,37 @@ class MiniMax:
 
         return value, action
 
-    def minmax(self, state, depth, alpha, beta, max_player):
-        action = None
-        self.state_expansions += 1
-
-        if (time.time() - self.start) > self.play_clock:
-            # Stop the search
-            raise TimeoutError()
-
-        if depth == 0:
-            return State.get_state_value(state), action
-
-        if max_player:
-            max_value = -INF
-            for next_state, next_action in self.get_successors(state):
-                value, _ = self.minmax(next_state, depth-1, alpha, beta, False)
-                max_value = max(max_value, value)
-                if value > alpha:
-                    alpha, action = value, next_action
-                if beta <= alpha:
-                    break
-            return max_value, action
-        else:
-            min_value = INF
-            for next_state, next_action in self.get_successors(state):
-                value, _ = self.minmax(next_state, depth - 1, alpha, beta, True)
-                min_value = min(min_value, value)
-                if value < beta:
-                    beta, action = value, next_action
-                if beta <= alpha:
-                    break
-            return min_value, action
+    # def minimax(self, state, depth, alpha, beta, max_player):
+    #     action = None
+    #     self.state_expansions += 1
+    #
+    #     if (time.time() - self.start) > self.play_clock:
+    #         # Stop the search
+    #         raise TimeoutError()
+    #
+    #     if depth == 0:
+    #         return State.get_state_value(state), action
+    #
+    #     if max_player:
+    #         max_value = -INF
+    #         for next_state, next_action in self.get_successors(state):
+    #             value, _ = self.minimax(next_state, depth - 1, alpha, beta, False)
+    #             max_value = max(max_value, value)
+    #             if value > alpha:
+    #                 alpha, action = value, next_action
+    #             if beta <= alpha:
+    #                 break
+    #         return max_value, action
+    #     else:
+    #         min_value = INF
+    #         for next_state, next_action in self.get_successors(state):
+    #             value, _ = self.minimax(next_state, depth - 1, alpha, beta, True)
+    #             min_value = min(min_value, value)
+    #             if value < beta:
+    #                 beta, action = value, next_action
+    #             if beta <= alpha:
+    #                 break
+    #         return min_value, action
 
 
 
