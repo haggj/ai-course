@@ -41,10 +41,6 @@ class MiniMax:
                 value, action = self.negamax(self.env.current_state, self.max_depth, -INF, INF, 1 if self.role == "white" else -1)
                 self.max_depth += 1
 
-                if self.max_depth == 4:
-                    max_value, max_action = value, action
-                    break
-
                 # Abort search if winning move was found
                 if value == 100:
                     max_value, max_action = value, action
