@@ -58,13 +58,12 @@ class MyAgent(RandomAgent):
     def get_best_move(self):
         legal_moves = self.env.get_legal_moves(self.env.current_state)
 
-        minimax = MiniMax(self.env, self.get_state_value, self.role, self.play_clock)
+        minimax = MiniMax(self.env, self.role, self.play_clock)
         res = minimax.run()
         return res
 
     def cleanup(self, last_move):
         self.game_terminated = True
-        # test = self.get_state_value(self.env.current_state, [])
         print("cleanup called")
         return
 
@@ -73,6 +72,3 @@ class MyAgent(RandomAgent):
             if search in data[i]:
                 return i
         raise ValueError("{!r} is not in list".format(search))
-
-    def get_state_value(self, state):
-        return state.get_state_value()

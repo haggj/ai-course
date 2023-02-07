@@ -1,3 +1,5 @@
+from DifferenceHeuristic import DifferenceHeuristic
+
 BLACK, WHITE, EMPTY = "B", "W", " "
 
 class State:
@@ -8,6 +10,7 @@ class State:
                     ]
         self.white_turn = True
         self.width = width
+        self.height = height
 
     def __str__(self) -> str:
         dash_count = self.width * 4 - 3
@@ -20,6 +23,11 @@ class State:
         for c in str(self.board)+str(self.white_turn):
             h = 101 * h + ord(c)
         return h
+    def index_2d(self, data, search):
+        for i in range(len(data)):
+            if search in data[i]:
+                return i
+        raise ValueError("{!r} is not in list".format(search))
 
     def is_terminal_state(self):
         distance_black = self.index_2d(self.board, BLACK)
@@ -28,17 +36,7 @@ class State:
             return True
         return False
 
-    def index_2d(self, data, search):
-        for i in range(len(data)):
-            if search in data[i]:
-                return i
-        raise ValueError("{!r} is not in list".format(search))
+    @staticmethod
+    def get_state_value(state):
+        return DifferenceHeuristic.eval(state)
 
-    def get_state_value(self):
-        distance_black = self.index_2d(self.board, BLACK)
-        distance_white = self.index_2d(self.board[::-1], WHITE)
-        if distance_black == 0:
-            return -100
-        if distance_white == 0:
-            return 100
-        return distance_black-distance_white

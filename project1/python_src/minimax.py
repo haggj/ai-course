@@ -4,6 +4,7 @@ import time
 from copy import deepcopy
 
 from environment import Environment
+from state import State
 
 INF = sys.maxsize
 
@@ -13,9 +14,8 @@ Entry = collections.namedtuple('Entry', ['value', 'flag', 'depth'])
 class MiniMax:
     """Minimax with iterative deepening"""
 
-    def __init__(self, env: Environment, heuristic, role, play_clock=10):
+    def __init__(self, env: Environment, role, play_clock=10):
         self.env = env
-        self.heuristic = heuristic
         self.role = role
         self.play_clock = 20 * 0.99
         self.transition_table = {}
@@ -90,7 +90,7 @@ class MiniMax:
 
         # Termination condition
         if depth == 0 or node.is_terminal_state():
-            return color*node.get_state_value(), None
+            return color * State.get_state_value(node), None
 
         # Recursion
         value = -INF
@@ -127,7 +127,7 @@ class MiniMax:
             raise TimeoutError()
 
         if depth == 0:
-            return self.heuristic(state, []), action
+            return State.get_state_value(state), action
 
         if max_player:
             max_value = -INF
