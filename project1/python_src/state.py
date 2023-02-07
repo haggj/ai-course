@@ -35,8 +35,8 @@ class State:
         raise ValueError("{!r} is not in list".format(search))
 
     def get_state_value(self):
-        distance_black = self.index_2d(self.board,BLACK)
-        distance_white = self.index_2d(self.board[::-1],WHITE)
+        distance_black = self.index_2d(self.board, BLACK)
+        distance_white = self.index_2d(self.board[::-1], WHITE)
         if distance_black == 0:
             return -100
         if distance_white == 0:

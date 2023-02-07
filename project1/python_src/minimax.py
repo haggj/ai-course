@@ -16,7 +16,6 @@ class MiniMax:
     def __init__(self, env: Environment, heuristic, role, play_clock=10):
         self.env = env
         self.heuristic = heuristic
-        self.cached_states = {}
         self.role = role
         self.play_clock = 20 * 0.99
         self.transition_table = {}
@@ -26,6 +25,7 @@ class MiniMax:
         self.state_expansions = 0
         self.start = time.time()
         self.max_depth = 1
+        self.transition_table_hits = 0
 
     def print_stats(self):
         end = time.time()
@@ -43,22 +43,11 @@ class MiniMax:
         max_value, max_action = -INF, None
         try:
             while True:
-                print("depth" + str(self.max_depth) + "...")
-                value, action = self.negamax(self.env.current_state, self.max_depth, -INF, INF, 1 if self.role == "white" else -1)
-                print("\t"+ str(time.time()-self.start))
-                print("\t" + str(self.state_expansions))
+                value, action = self.negamax(self.env.current_state, self.max_depth, -INF, INF,  1 if self.role == "white" else -1)
+                max_value, max_action = value, action
                 self.max_depth += 1
 
-                # Abort search if winning move was found
-                if value == 100:
-                    max_value, max_action = value, action
-                    break
-
-                # Only update value if better action was found
-                if value > max_value:
-                    max_value, max_action = value, action
-
-                if self.max_depth == 6:
+                if self.max_depth == 5:
                     break
         except TimeoutError:
             pass
@@ -69,7 +58,7 @@ class MiniMax:
     def get_successors(self, state):
         legal_moves = self.env.get_legal_moves(state)
         for next_action in legal_moves:
-            next_state = deepcopy(self.env.current_state)
+            next_state = deepcopy(state)
             self.env.move(next_state, next_action)
             yield next_state, next_action
 
