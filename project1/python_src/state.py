@@ -1,4 +1,5 @@
 from DifferenceHeuristic import DifferenceHeuristic
+from GPTHeuristic import GPTHeuristic
 
 BLACK, WHITE, EMPTY = "B", "W", " "
 
@@ -38,5 +39,5 @@ class State:
 
     @staticmethod
     def get_state_value(state):
-        return DifferenceHeuristic.eval(state)
+        return GPTHeuristic.eval(state)
 
