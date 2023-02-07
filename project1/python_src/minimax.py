@@ -34,7 +34,7 @@ class MiniMax:
         print("Max depth: " + str(self.max_depth - 1))
         print("Duration: " + str(end - self.start))
         print("States/Second: " + str(self.state_expansions / (end - self.start)))
-        print("Cached states: " + str(len(self.cached_states)))
+        print("Transition table hits: " + str(self.transition_table_hits))
 
     def run(self):
         self.init_stats()
