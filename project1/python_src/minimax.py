@@ -1,3 +1,4 @@
+import collections
 import sys
 import time
 from copy import deepcopy
@@ -5,6 +6,9 @@ from copy import deepcopy
 from environment import Environment
 
 INF = sys.maxsize
+
+Entry = collections.namedtuple('Entry', ['value', 'flag', 'depth'])
+
 
 class MiniMax:
     """Minimax with iterative deepening"""
@@ -15,6 +19,7 @@ class MiniMax:
         self.cached_states = {}
         self.role = role
         self.play_clock = 20 * 0.99
+        self.transition_table = {}
 
 
     def init_stats(self):
@@ -38,7 +43,10 @@ class MiniMax:
         max_value, max_action = -INF, None
         try:
             while True:
+                print("depth" + str(self.max_depth) + "...")
                 value, action = self.negamax(self.env.current_state, self.max_depth, -INF, INF, 1 if self.role == "white" else -1)
+                print("\t"+ str(time.time()-self.start))
+                print("\t" + str(self.state_expansions))
                 self.max_depth += 1
 
                 # Abort search if winning move was found
@@ -65,7 +73,6 @@ class MiniMax:
             self.env.move(next_state, next_action)
             yield next_state, next_action
 
-
     def negamax(self, node, depth, alpha, beta, color):
         action = None
         self.state_expansions += 1
@@ -77,9 +84,26 @@ class MiniMax:
             # raise TimeoutError()
             pass
 
+        # Transition table lookup
+        alpha_orig = alpha
+        if False and node in self.transition_table:
+            entry = self.transition_table[node]
+            if entry.depth >= depth:
+                if entry.flag == "exact":
+                    return entry.value, None
+                elif entry.flag == "lower":
+                    alpha = max(alpha, entry.value)
+                elif entry.flag == "upper":
+                    beta = min(beta, entry.value)
+
+                if alpha >= beta:
+                    return entry.value, None
+
+        # Termination condition
         if depth == 0 or node.is_terminal_state():
             return color*node.get_state_value(), None
 
+        # Recursion
         value = -INF
         for next_state, next_action in self.get_successors(node):
             res, _ = self.negamax(next_state, depth - 1, -beta, -alpha, -color)
@@ -89,6 +113,17 @@ class MiniMax:
             alpha = max(alpha, value)
             if alpha >= beta:
                 break
+
+        # Transition table store
+        if value <= alpha_orig:
+            flag = "upper"
+        elif value >= beta:
+            flag = "lower"
+        else:
+            flag = "exact"
+        self.transition_table[node] = Entry(value=value, depth=depth, flag=flag)
+
+
         return value, action
 
 
