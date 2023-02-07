@@ -53,8 +53,9 @@ class MiniMax:
                 # Only update value if better action was found
                 if value > max_value:
                     max_value, max_action = value, action
-                # if self.max_depth == 6:
-                #     break
+
+                if self.max_depth == 6:
+                    break
         except TimeoutError:
             pass
 
