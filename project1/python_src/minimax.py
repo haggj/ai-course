@@ -14,10 +14,10 @@ Entry = collections.namedtuple('Entry', ['value', 'flag', 'depth'])
 class MiniMax:
     """Minimax with iterative deepening"""
 
-    def __init__(self, env: Environment, role, play_clock=10):
+    def __init__(self, env: Environment, role, play_clock):
         self.env = env
         self.role = role
-        self.play_clock = 20 * 0.99
+        self.play_clock = play_clock * 0.99
         self.transition_table = {}
 
 
@@ -47,8 +47,8 @@ class MiniMax:
                 max_value, max_action = value, action
                 self.max_depth += 1
 
-                if self.max_depth == 5:
-                    break
+                # if self.max_depth == 5:
+                #     break
         except TimeoutError:
             pass
 
@@ -65,13 +65,10 @@ class MiniMax:
     def negamax(self, node, depth, alpha, beta, color):
         action = None
         self.state_expansions += 1
-        if self.state_expansions % 50000 == 0:
-            print(self.state_expansions)
 
         if (time.time() - self.start) > self.play_clock:
             # Stop the search
-            # raise TimeoutError()
-            pass
+            raise TimeoutError()
 
         # Transition table lookup
         alpha_orig = alpha
@@ -112,11 +109,7 @@ class MiniMax:
             flag = "exact"
         self.transition_table[node] = Entry(value=value, depth=depth, flag=flag)
 
-
         return value, action
-
-
-
 
     def minmax(self, state, depth, alpha, beta, max_player):
         action = None

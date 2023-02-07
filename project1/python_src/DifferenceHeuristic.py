@@ -1,6 +1,7 @@
 
 BLACK, WHITE, EMPTY = "B", "W", " "
 
+
 class DifferenceHeuristic:
 
     @staticmethod

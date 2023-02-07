@@ -18,11 +18,11 @@ class State:
         return line.join([ " | ".join([cell for cell in row]) for row in self.board[::-1]])
 
     def __hash__(self):
-        # TODO (DONE): modify as needed
         h = 1
         for c in str(self.board)+str(self.white_turn):
             h = 101 * h + ord(c)
         return h
+
     def index_2d(self, data, search):
         for i in range(len(data)):
             if search in data[i]:
