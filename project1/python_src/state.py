@@ -21,26 +21,24 @@ class State:
             h = 101 * h + ord(c)
         return h
 
+    def is_terminal_state(self):
+        distance_black = self.index_2d(self.board, BLACK)
+        distance_white = self.index_2d(self.board[::-1], WHITE)
+        if distance_black == 0 or distance_white == 0:
+            return True
+        return False
+
     def index_2d(self, data, search):
         for i in range(len(data)):
             if search in data[i]:
                 return i
         raise ValueError("{!r} is not in list".format(search))
 
-    def get_state_value(self, role):
+    def get_state_value(self):
         distance_black = self.index_2d(self.board,BLACK)
         distance_white = self.index_2d(self.board[::-1],WHITE)
         if distance_black == 0:
-            if role == "white":
-                return -100
-            else:
-                return 100
+            return -100
         if distance_white == 0:
-            if role == "white":
-                return 100
-            else:
-                return -100
-        if role == "white":
-            return distance_black-distance_white
-        else:
-            return distance_white-distance_black
+            return 100
+        return distance_black-distance_white

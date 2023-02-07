@@ -14,7 +14,7 @@ class MiniMax:
         self.heuristic = heuristic
         self.cached_states = {}
         self.role = role
-        self.play_clock = 30 * 0.99
+        self.play_clock = 20 * 0.99
 
 
     def init_stats(self):
@@ -38,8 +38,12 @@ class MiniMax:
         max_value, max_action = -INF, None
         try:
             while True:
-                value, action = self.minmax(self.env.current_state, self.max_depth, -INF, INF, True)
+                value, action = self.negamax(self.env.current_state, self.max_depth, -INF, INF, 1 if self.role == "white" else -1)
                 self.max_depth += 1
+
+                if self.max_depth == 4:
+                    max_value, max_action = value, action
+                    break
 
                 # Abort search if winning move was found
                 if value == 100:
@@ -63,6 +67,35 @@ class MiniMax:
             next_state = deepcopy(self.env.current_state)
             self.env.move(next_state, next_action)
             yield next_state, next_action
+
+
+    def negamax(self, node, depth, alpha, beta, color):
+        action = None
+        self.state_expansions += 1
+        if self.state_expansions % 50000 == 0:
+            print(self.state_expansions)
+
+        if (time.time() - self.start) > self.play_clock:
+            # Stop the search
+            # raise TimeoutError()
+            pass
+
+        if depth == 0 or node.is_terminal_state():
+            return color*node.get_state_value(), None
+
+        value = -INF
+        for next_state, next_action in self.get_successors(node):
+            res, _ = self.negamax(next_state, depth - 1, -beta, -alpha, -color)
+            if -res > value:
+                action = next_action
+            value = max(value, -res)
+            alpha = max(alpha, value)
+            if alpha >= beta:
+                break
+        return value, action
+
+
+
 
     def minmax(self, state, depth, alpha, beta, max_player):
         action = None
