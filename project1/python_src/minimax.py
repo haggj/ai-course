@@ -24,17 +24,21 @@ class MiniMax:
     def init_stats(self):
         self.state_expansions = 0
         self.start = time.time()
+        self.timeStamps = []
         self.max_depth = 1
         self.transition_table_hits = 0
 
     def print_stats(self):
         end = time.time()
-        print("\n\n\nStats of MiniMax")
+        print("\n\n\nStats of MiniMax / NegaMax")
         print("Expanded states: " + str(self.state_expansions))
         print("Max depth: " + str(self.max_depth - 1))
-        print("Duration: " + str(end - self.start))
+        print("Total Duration: " + str(end - self.start))
+        for t in self.timeStamps:
+            print(t)
         print("States/Second: " + str(self.state_expansions / (end - self.start)))
         print("Transition table hits: " + str(self.transition_table_hits))
+        print(self.role)
 
     def run(self):
         self.init_stats()
@@ -45,6 +49,7 @@ class MiniMax:
             while True:
                 value, action = self.negamax(self.env.current_state, self.max_depth, -INF, INF,  1 if self.role == "white" else -1)
                 max_value, max_action = value, action
+                self.timeStamps.append("\tDepth-" + str(self.max_depth) + ": " + str(time.time() - self.start) + " s")
                 self.max_depth += 1
 
                 # if self.max_depth == 5:
@@ -91,6 +96,8 @@ class MiniMax:
 
         # Recursion
         value = -INF
+        # sort
+        #sorted_childNodes = sorted(self.get_successors(node), key=lambda x: State.get_state_value(x[0]), reverse=(self.role == 'white'))
         for next_state, next_action in self.get_successors(node):
             res, _ = self.negamax(next_state, depth - 1, -beta, -alpha, -color)
             if -res > value:

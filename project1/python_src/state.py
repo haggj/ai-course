@@ -1,5 +1,7 @@
 from DifferenceHeuristic import DifferenceHeuristic
 from GPTHeuristic import GPTHeuristic
+from Pieces_Progress import Pieces_Progress
+from Pieces_Progress_v2 import Pieces_Progress_2
 
 BLACK, WHITE, EMPTY = "B", "W", " "
 
@@ -39,5 +41,6 @@ class State:
 
     @staticmethod
     def get_state_value(state):
+        #return Pieces_Progress_2.eval(state)
         return GPTHeuristic.eval(state)
 
