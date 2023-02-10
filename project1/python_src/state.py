@@ -1,3 +1,8 @@
+import hashlib
+import time
+
+import numpy
+
 from DifferenceHeuristic import DifferenceHeuristic
 from GPTHeuristic import GPTHeuristic
 from Pieces_Progress import Pieces_Progress
@@ -11,6 +16,9 @@ class State:
                     [BLACK] * width if i > height - 3 else 
                     [EMPTY] * width for i in range(height)
                     ]
+
+        self.board = numpy.array(self.board)
+
         self.white_turn = True
         self.width = width
         self.height = height
@@ -21,8 +29,8 @@ class State:
         return line.join([ " | ".join([cell for cell in row]) for row in self.board[::-1]])
 
     def __hash__(self):
-        board = str(self.board).encode()
-        hash_value = hashlib.md5(board).hexdigest()
+        p = self.board.data.tobytes()
+        hash_value = hashlib.md5(p).hexdigest()
         return int(hash_value, 16)
 
     def __eq__(self, other):
@@ -43,6 +51,18 @@ class State:
 
     @staticmethod
     def get_state_value(state):
-        #return Pieces_Progress_2.eval(state)
-        return GPTHeuristic.eval(state)
+        return Pieces_Progress_2.eval(state)
+        #return GPTHeuristic.eval(state)
+
+
+if __name__=="__main__":
+    runs = 100000
+    states = [State(6,6), State(7,7), State(8,8), State(9,9), State(10,10)]
+
+    start = time.time()
+    for i in range(runs//5):
+        for state in states:
+            hash(state)
+    end = time.time()
+    print(f"Took {round((end-start),3)}s")
 
