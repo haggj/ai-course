@@ -13,7 +13,7 @@ class Environment:
         if not state.white_turn and y >= max_height_black: return True
         return False
 
-    def get_moves(self, state, moves, y, x):
+    def get_moves(self, state, y, x, captures, moves):
         opponent = BLACK if state.white_turn else WHITE
         one_step = 1 if state.white_turn else -1
         two_steps = 2 if state.white_turn else -2
@@ -37,21 +37,22 @@ class Environment:
         # Capture diagonal
         if self.can_move_n_steps_forward(state, y, 1, self.heigt - 2):
             if x > 0 and state.board[y + one_step][x - 1] == opponent:
-                moves.append((x, y, x - 1, y + one_step))
+                captures.append((x, y, x - 1, y + one_step))
             
             if x < self.width - 1 and state.board[y + one_step][x + 1] == opponent:
-                moves.append((x, y, x + 1, y + one_step))
+                captures.append((x, y, x + 1, y + one_step))
 
     def get_legal_moves(self, state):
         moves = []
+        captures = []
         friendly = WHITE if state.white_turn else BLACK
 
         for y in range(self.heigt):
             for x in range(self.width):
                 if state.board[y][x] == friendly:
-                    self.get_moves(state, moves, y, x)
+                    self.get_moves(state, y, x, captures, moves)
 
-        return moves
+        return moves+captures
 
     def move(self, state, move):
         x1, y1, x2, y2 = move
