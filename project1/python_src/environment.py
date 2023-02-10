@@ -52,7 +52,7 @@ class Environment:
                 if state.board[y][x] == friendly:
                     self.get_moves(state, y, x, captures, moves)
 
-        return moves+captures
+        return captures+moves
 
     def move(self, state, move):
         x1, y1, x2, y2 = move
