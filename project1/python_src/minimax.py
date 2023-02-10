@@ -7,7 +7,6 @@ from environment import Environment
 from state import State
 
 INF = sys.maxsize
-
 Entry = collections.namedtuple('Entry', ['value', 'flag', 'depth'])
 
 
@@ -42,13 +41,19 @@ class MiniMax:
 
     def run(self):
         self.init_stats()
+        max_value, max_action = -INF, None
+        negamax_color = 1 if self.role == "white" else -1
+        root_state = deepcopy(self.env.current_state)
 
         # Run MiniMax using Iterative Deepening (until TimeoutError is raised)
-        max_value, max_action = -INF, None
         try:
             while True:
-                value, action = self.negamax(self.env.current_state, self.max_depth, -INF, INF,  1 if self.role == "white" else -1)
-                max_value, max_action = value, action
+                max_value, max_action = self.negamax(
+                    node=root_state,
+                    depth=self.max_depth,
+                    alpha=-INF,
+                    beta=INF,
+                    color=negamax_color)
                 self.timeStamps.append("\tDepth-" + str(self.max_depth) + ": " + str(time.time() - self.start) + " s")
                 self.max_depth += 1
 
@@ -98,8 +103,10 @@ class MiniMax:
         value = -INF
         # sort
         #sorted_childNodes = sorted(self.get_successors(node), key=lambda x: State.get_state_value(x[0]), reverse=(self.role == 'white'))
-        for next_state, next_action in self.get_successors(node):
-            res, _ = self.negamax(next_state, depth - 1, -beta, -alpha, -color)
+        for next_action in self.env.get_legal_moves(node):
+            self.env.move(node, next_action)
+            res, _ = self.negamax(node, depth - 1, -beta, -alpha, -color)
+            self.env.undo_move(node, next_action)
             if -res > value:
                 action = next_action
             value = max(value, -res)
