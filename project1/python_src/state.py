@@ -21,10 +21,12 @@ class State:
         return line.join([ " | ".join([cell for cell in row]) for row in self.board[::-1]])
 
     def __hash__(self):
-        h = 1
-        for c in str(self.board)+str(self.white_turn):
-            h = 101 * h + ord(c)
-        return h
+        board = str(self.board).encode()
+        hash_value = hashlib.md5(board).hexdigest()
+        return int(hash_value, 16)
+
+    def __eq__(self, other):
+        return hash(self) == hash(other)
 
     def index_2d(self, data, search):
         for i in range(len(data)):

@@ -72,6 +72,15 @@ class MiniMax:
             self.env.move(next_state, next_action)
             yield next_state, next_action
 
+    def store_transition_table(self, node, value, alpha_orig, beta, depth):
+            if value <= alpha_orig:
+                flag = "upper"
+            elif value >= beta:
+                flag = "lower"
+            else:
+                flag = "exact"
+            self.transition_table[node] = Entry(value=value, depth=depth, flag=flag)
+
     def negamax(self, node, depth, alpha, beta, color):
         action = None
         self.state_expansions += 1
@@ -82,22 +91,24 @@ class MiniMax:
 
         # Transition table lookup
         alpha_orig = alpha
-        if False and node in self.transition_table:
-            entry = self.transition_table[node]
-            if entry.depth >= depth:
-                if entry.flag == "exact":
-                    return entry.value, None
-                elif entry.flag == "lower":
-                    alpha = max(alpha, entry.value)
-                elif entry.flag == "upper":
-                    beta = min(beta, entry.value)
+        entry = self.transition_table.get(node)
+        if entry and entry.depth >= depth:
+            self.transition_table_hits += 1
+            if entry.flag == "exact":
+                return entry.value, None
+            elif entry.flag == "lower":
+                alpha = max(alpha, entry.value)
+            elif entry.flag == "upper":
+                beta = min(beta, entry.value)
 
-                if alpha >= beta:
-                    return entry.value, None
+            if alpha >= beta:
+                return entry.value, None
 
         # Termination condition
         if depth == 0 or node.is_terminal_state():
-            return color * State.get_state_value(node), None
+            value = color * State.get_state_value(node)
+            self.store_transition_table(node, value, alpha_orig, beta, depth)
+            return value, None
 
         # Recursion
         value = -INF
@@ -115,13 +126,7 @@ class MiniMax:
                 break
 
         # Transition table store
-        if value <= alpha_orig:
-            flag = "upper"
-        elif value >= beta:
-            flag = "lower"
-        else:
-            flag = "exact"
-        self.transition_table[node] = Entry(value=value, depth=depth, flag=flag)
+        self.store_transition_table(node, value, alpha_orig, beta, depth)
 
         return value, action
 
