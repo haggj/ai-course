@@ -3,6 +3,10 @@ BLACK, WHITE, EMPTY = "B", "W", " "
 
 
 class CombinedHeuristic:
+    """
+    Combine the OffensiveHeuristic and the DefensiveHeuristic:
+    Try to move forward while also increasing the number of pieces.
+    """
 
     @staticmethod
     def eval(state, role):

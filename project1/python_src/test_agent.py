@@ -5,6 +5,7 @@ tested_agent = MyAgent()
 
 
 class TestAgent:
+    """Test if our agent computes the correct set of the legal moves."""
 
     def empty_state(self):
         state = State(width=10, height=10)

@@ -1,7 +1,7 @@
 import random
 from agent import RandomAgent
 from environment import Environment
-from minimax import MiniMax
+from negamax import NegaMax
 
 BLACK, WHITE, EMPTY = "B", "W", " "
 
@@ -27,8 +27,7 @@ class MyAgent(RandomAgent):
         #  our action is the first
         self.width = width
         self.height = height
-        # TODO: add your own initialization code here
-        self.env = Environment(width=width, height=height)
+        self.env = Environment(width=width, height=height, role=role)
 
     def next_action(self, last_action):
         if last_action:
@@ -37,10 +36,12 @@ class MyAgent(RandomAgent):
             else:
                 last_player = 'black'
             print("%s moved from %s to %s" % (last_player, str(last_action[0:2]), str(last_action[2:4])))
-            # TODO: 1. update your internal world model according to the action that was just executed
             x1, y1, x2, y2 = last_action
             if self.last_move != (x1-1, y1-1, x2-1, y2-1) and self.my_turn:
-                print("ERRORRRR +++++++++++++")
+                print("Error! Our last move was not expected. "
+                      "Probably we timed out or did an illegal move")
+                exit(0)
+            # Simulate move of opponent
             self.env.move(self.env.current_state, (x1-1, y1-1, x2-1, y2-1))
         else:
             print("first move!")
@@ -48,7 +49,6 @@ class MyAgent(RandomAgent):
         # update turn (above that line it myTurn is still for the previous state)
         self.my_turn = not self.my_turn
         if self.my_turn:
-            # TODO: 2. run alpha-beta search to determine the best move
             x1, y1, x2, y2 = self.get_best_move()
             self.last_move = (x1, y1, x2, y2)
             return "(move " + " ".join(map(str, [x1+1, y1+1, x2+1, y2+1])) + ")"
@@ -56,19 +56,10 @@ class MyAgent(RandomAgent):
             return "noop"
 
     def get_best_move(self):
-        legal_moves = self.env.get_legal_moves(self.env.current_state)
-
-        minimax = MiniMax(self.env, self.role, self.play_clock)
-        res = minimax.run()
-        return res
+        """Compute the best possible move according to the NegaMax algorithm."""
+        return NegaMax(self.env, self.role, self.play_clock).run()
 
     def cleanup(self, last_move):
         self.game_terminated = True
         print("cleanup called")
         return
-
-    def index_2d(self, data, search):
-        for i in range(len(data)):
-            if search in data[i]:
-                return i
-        raise ValueError("{!r} is not in list".format(search))

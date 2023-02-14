@@ -3,16 +3,12 @@ import time
 
 import numpy
 
-from DefensiveHeurisitcs import DefensiveHeuristics
-from DifferenceHeuristic import DifferenceHeuristic
-from GPTHeuristic import GPTHeuristic
-from Pieces_Progress import Pieces_Progress
-from Pieces_Progress_v2 import Pieces_Progress_2
 from CombinedHeuristic import CombinedHeuristic
 from OffensiveHeurisitics import OffensiveHeuristics
 from DefensiveHeurisitcs import DefensiveHeuristics
 
 BLACK, WHITE, EMPTY = "B", "W", " "
+
 
 class State:
     def __init__(self, width, height):
@@ -22,7 +18,6 @@ class State:
                     ]
 
         self.board = numpy.array(self.board)
-
         self.white_turn = True
         self.width = width
         self.height = height
@@ -33,6 +28,10 @@ class State:
         return line.join([ " | ".join([cell for cell in row]) for row in self.board[::-1]])
 
     def __hash__(self):
+        """
+        The numpy array stores the underlying data as bytes.
+        This allows us to compute the hash of the state efficiently.
+        """
         p = self.board.data.tobytes() + bytes(self.white_turn)
         hash_value = hashlib.md5(p).hexdigest()
         return int(hash_value, 16)
@@ -47,6 +46,7 @@ class State:
         raise ValueError("{!r} is not in list".format(search))
 
     def is_terminal_state(self):
+        """Check if this state is a terminal state"""
         distance_black = self.index_2d(self.board, BLACK)
         distance_white = self.index_2d(self.board[::-1], WHITE)
         if distance_black == 0 or distance_white == 0:
@@ -55,17 +55,6 @@ class State:
 
     @staticmethod
     def get_state_value(state, role):
+        """Compute the value of the state based on the used heuristics"""
         return CombinedHeuristic.eval(state, role)
-
-
-if __name__=="__main__":
-    runs = 100000
-    states = [State(6,6), State(7,7), State(8,8), State(9,9), State(10,10)]
-
-    start = time.time()
-    for i in range(runs//5):
-        for state in states:
-            hash(state)
-    end = time.time()
-    print(f"Took {round((end-start),3)}s")
 

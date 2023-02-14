@@ -3,14 +3,10 @@ BLACK, WHITE, EMPTY = "B", "W", " "
 
 
 class OffensiveHeuristics:
-
-    @staticmethod
-    def index_2d(data, search):
-        for i in range(len(data)):
-            if search in data[i]:
-                return i
-
-        return len(data)
+    """
+    Try to move forward in the field.
+    Do not consider captures at all.
+    """
 
     @staticmethod
     def eval(state, role):
