@@ -42,7 +42,7 @@ class MiniMax:
     def run(self):
         self.init_stats()
         max_value, max_action = -INF, None
-        negamax_color = 1 if self.role == "white" else -1
+        negamax_color = 1
         root_state = deepcopy(self.env.current_state)
 
         # Run MiniMax using Iterative Deepening (until TimeoutError is raised)
@@ -56,6 +56,8 @@ class MiniMax:
                     color=negamax_color)
                 self.timeStamps.append("\tDepth-" + str(self.max_depth) + ": " + str(time.time() - self.start) + " s")
                 self.max_depth += 1
+                if max_value == 100:
+                    break
 
                 # if self.max_depth == 5:
                 #     break

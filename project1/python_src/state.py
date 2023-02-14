@@ -3,6 +3,7 @@ import time
 
 import numpy
 
+from DefensiveHeurisitcs import DefensiveHeuristics
 from DifferenceHeuristic import DifferenceHeuristic
 from GPTHeuristic import GPTHeuristic
 from Pieces_Progress import Pieces_Progress
@@ -29,7 +30,7 @@ class State:
         return line.join([ " | ".join([cell for cell in row]) for row in self.board[::-1]])
 
     def __hash__(self):
-        p = self.board.data.tobytes()
+        p = self.board.data.tobytes() + bytes(self.white_turn)
         hash_value = hashlib.md5(p).hexdigest()
         return int(hash_value, 16)
 
@@ -50,9 +51,8 @@ class State:
         return False
 
     @staticmethod
-    def get_state_value(state):
-        return Pieces_Progress_2.eval(state)
-        #return GPTHeuristic.eval(state)
+    def get_state_value(state, role):
+        return DefensiveHeuristics.eval(state, role)
 
 
 if __name__=="__main__":
