@@ -16,27 +16,27 @@ class CombinedHeuristic:
         distance_white = board_size
 
         # look through each row
-        for row in range(board_size - 1):
+        for y in range(len(state.board)):
             # look through each field in row
-            for field in state.board[row]:
+            for x in range(len(state.board[0])):
                 # found white piece
-                if field == WHITE:
+                if state.board[y,x] == WHITE:
                     # count white pieces
                     available_white += 1
 
                     # calculate distance to goal of white piece
-                    d = board_size - row
+                    d = board_size - y - 1
                     # and choose the lowest distance of all pieces
                     if d < distance_white:
                         distance_white = d
                 # found black piece
-                elif field == BLACK:
+                elif state.board[y,x] == BLACK:
                     # count black pieces
                     available_black += 1
 
                     # choose the lowest distance to goal of black pieces
-                    if row < distance_black:
-                        distance_black = row
+                    if y < distance_black:
+                        distance_black = y
 
         if role == "white":
             if distance_white == 0:

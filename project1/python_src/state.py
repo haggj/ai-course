@@ -9,6 +9,8 @@ from GPTHeuristic import GPTHeuristic
 from Pieces_Progress import Pieces_Progress
 from Pieces_Progress_v2 import Pieces_Progress_2
 from CombinedHeuristic import CombinedHeuristic
+from OffensiveHeurisitics import OffensiveHeuristics
+from DefensiveHeurisitcs import DefensiveHeuristics
 
 BLACK, WHITE, EMPTY = "B", "W", " "
 
@@ -53,7 +55,7 @@ class State:
 
     @staticmethod
     def get_state_value(state, role):
-        return DefensiveHeuristics.eval(state, role)
+        return CombinedHeuristic.eval(state, role)
 
 
 if __name__=="__main__":
