@@ -125,7 +125,7 @@ class MiniMax:
 
         # Termination condition
         if depth == 0 or node.is_terminal_state():
-            value = color * State.get_state_value(node)
+            value = color * State.get_state_value(node, self.role)
             self.store_transition_table(node, value, alpha_orig, beta, depth)
             return value
 

@@ -8,6 +8,7 @@ from DifferenceHeuristic import DifferenceHeuristic
 from GPTHeuristic import GPTHeuristic
 from Pieces_Progress import Pieces_Progress
 from Pieces_Progress_v2 import Pieces_Progress_2
+from CombinedHeuristic import CombinedHeuristic
 
 BLACK, WHITE, EMPTY = "B", "W", " "
 
