@@ -48,7 +48,7 @@ class MiniMax:
         # Run MiniMax using Iterative Deepening (until TimeoutError is raised)
         try:
             while True:
-                max_value, max_action = self.negamax(
+                max_value, max_action = self.start_negamax(
                     node=root_state,
                     depth=self.max_depth,
                     alpha=-INF,
@@ -81,6 +81,23 @@ class MiniMax:
                 flag = "exact"
             self.transition_table[node] = Entry(value=value, depth=depth, flag=flag)
 
+    def start_negamax(self, node, depth, alpha, beta, color):
+        action = None
+        value = -INF
+
+        for next_action in self.env.get_legal_moves(node):
+            self.env.move(node, next_action)
+            res = self.negamax(node, depth - 1, -beta, -alpha, -color)
+            self.env.undo_move(node, next_action)
+            if -res > value:
+                action = next_action
+            value = max(value, -res)
+            alpha = max(alpha, value)
+            if alpha >= beta:
+                break
+
+        return value, action
+
     def negamax(self, node, depth, alpha, beta, color):
         action = None
         self.state_expansions += 1
@@ -95,20 +112,20 @@ class MiniMax:
         if entry and entry.depth >= depth:
             self.transition_table_hits += 1
             if entry.flag == "exact":
-                return entry.value, None
+                return entry.value
             elif entry.flag == "lower":
                 alpha = max(alpha, entry.value)
             elif entry.flag == "upper":
                 beta = min(beta, entry.value)
 
             if alpha >= beta:
-                return entry.value, None
+                return entry.value
 
         # Termination condition
         if depth == 0 or node.is_terminal_state():
             value = color * State.get_state_value(node)
             self.store_transition_table(node, value, alpha_orig, beta, depth)
-            return value, None
+            return value
 
         # Recursion
         value = -INF
@@ -116,10 +133,8 @@ class MiniMax:
         #sorted_childNodes = sorted(self.get_successors(node), key=lambda x: State.get_state_value(x[0]), reverse=(self.role == 'white'))
         for next_action in self.env.get_legal_moves(node):
             self.env.move(node, next_action)
-            res, _ = self.negamax(node, depth - 1, -beta, -alpha, -color)
+            res = self.negamax(node, depth - 1, -beta, -alpha, -color)
             self.env.undo_move(node, next_action)
-            if -res > value:
-                action = next_action
             value = max(value, -res)
             alpha = max(alpha, value)
             if alpha >= beta:
@@ -127,8 +142,7 @@ class MiniMax:
 
         # Transition table store
         self.store_transition_table(node, value, alpha_orig, beta, depth)
-
-        return value, action
+        return value
 
     # def minimax(self, state, depth, alpha, beta, max_player):
     #     action = None
