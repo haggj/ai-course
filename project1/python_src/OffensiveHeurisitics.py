@@ -2,7 +2,7 @@
 BLACK, WHITE, EMPTY = "B", "W", " "
 
 
-class DefensiveHeuristics:
+class OffensiveHeuristics:
 
     @staticmethod
     def index_2d(data, search):
@@ -15,8 +15,6 @@ class DefensiveHeuristics:
     @staticmethod
     def eval(state, role):
         board_height = len(state.board)
-        available_black = 0
-        available_white = 0
         distance_black = board_height
         distance_white = board_height
 
@@ -24,21 +22,19 @@ class DefensiveHeuristics:
             for x in range(len(state.board[0])):
                 if state.board[y][x] == BLACK:
                     distance_black = min(y, distance_black)
-                    available_black += 1
                 elif state.board[y][x] == WHITE:
                     distance_white = min(board_height-y-1, distance_white)
-                    available_white += 1
 
         if role == "white":
             if distance_white == 0:
                 return 100
             if distance_black == 0:
                 return -100
-            return 2*available_white - available_black
+            return board_height-distance_white
         else:
             if distance_black == 0:
                 return 100
             if distance_white == 0:
                 return -100
-            return 2*available_black - available_white
+            return board_height-distance_black
 
