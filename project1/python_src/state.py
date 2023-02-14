@@ -12,6 +12,28 @@ from CombinedHeuristic import CombinedHeuristic
 from OffensiveHeurisitics import OffensiveHeuristics
 from DefensiveHeurisitcs import DefensiveHeuristics
 
+import random
+
+zobTable = [[[random.randint(1,2**64 - 1) for i in range(2)]for j in range(10)]for k in range(10)]
+
+def indexing(piece):
+    ''' mapping each piece to a particular number'''
+    if (piece=='B'):
+        return 0
+    if (piece=='W'):
+        return 1
+    else:
+        return -1
+
+def computeHash(board):
+    h = 0
+    for i in range(len(board)):
+        for j in range(len(board[i])):
+            if board[i][j] != ' ':
+                piece = indexing(board[i][j])
+                h ^= zobTable[i][j][piece]
+    return h
+
 BLACK, WHITE, EMPTY = "B", "W", " "
 
 class State:
@@ -33,25 +55,14 @@ class State:
         return line.join([ " | ".join([cell for cell in row]) for row in self.board[::-1]])
 
     def __hash__(self):
-        p = self.board.data.tobytes() + bytes(self.white_turn)
-        hash_value = hashlib.md5(p).hexdigest()
-        return int(hash_value, 16)
+        #p = self.board.data.tobytes() + bytes(self.white_turn)
+        #hash_value = hashlib.md5(p).hexdigest()
+
+        #return int(hash_value, 16)
+        return computeHash(self.board)
 
     def __eq__(self, other):
         return hash(self) == hash(other)
-
-    def index_2d(self, data, search):
-        for i in range(len(data)):
-            if search in data[i]:
-                return i
-        raise ValueError("{!r} is not in list".format(search))
-
-    def is_terminal_state(self):
-        distance_black = self.index_2d(self.board, BLACK)
-        distance_white = self.index_2d(self.board[::-1], WHITE)
-        if distance_black == 0 or distance_white == 0:
-            return True
-        return False
 
     @staticmethod
     def get_state_value(state, role):

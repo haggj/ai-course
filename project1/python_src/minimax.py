@@ -59,8 +59,8 @@ class MiniMax:
                 if max_value == 100:
                     break
 
-                # if self.max_depth == 5:
-                #     break
+                if max_value == 100:
+                    break
         except TimeoutError:
             pass
 
