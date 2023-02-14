@@ -131,16 +131,23 @@ class NegaMax:
             if alpha >= beta:
                 return entry.value
 
-        # Termination condition
+        # Termination condition 1: Check if a player won or depth reached.
+        # Optimization: Do not use node.is_terminal_state() to avoid redundant loops.
+        #               Terminate if state value is value 100 or -100.
         value = State.get_state_value(node, self.role)
         if depth == 0 or value == 100 or value == -100:
             value = color * value
             self._store_transition_table(node, value, alpha_orig, beta, depth)
             return value
 
+        # Termination condition 2: Draw detection; only proceed if legal moves are possible.
+        moves = self.env.get_legal_moves(node)
+        if not moves:
+            return 0
+
         # Recursion
         value = -INF
-        for next_action in self.env.get_legal_moves(node):
+        for next_action in moves:
             self.env.move(node, next_action)
             res = self.negamax(node, depth - 1, -beta, -alpha, -color)
             self.env.undo_move(node, next_action)
