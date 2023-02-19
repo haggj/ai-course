@@ -6,6 +6,7 @@ import numpy
 from CombinedHeuristic import CombinedHeuristic
 from OffensiveHeurisitics import OffensiveHeuristics
 from DefensiveHeurisitcs import DefensiveHeuristics
+from python_src.DefaultHeuristic import DefaultHeuristics
 
 BLACK, WHITE, EMPTY = "B", "W", " "
 
@@ -57,4 +58,4 @@ class State:
     def get_state_value(state, role):
         """Compute the value of the state based on the used heuristics"""
         return CombinedHeuristic.eval(state, role)
-
+        #return DefaultHeuristics.eval(state, role)
