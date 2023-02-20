@@ -42,7 +42,7 @@ def setup_csp():
     # The Ukrainian drinks tea.
     model.Add(variables["Ukrainian"] == variables["Tea"])
     # The green house is immediately to the right of the ivory house.
-    model.Add((variables["Green"] + 1) == variables["Ivory"])
+    model.Add(variables["Green"] == (variables["Ivory"] + 1))
     # The Old Gold smoker owns snails.
     model.Add(variables["Old Gold"] == variables["Snails"])
     # Kools are smoked in the yellow house.
