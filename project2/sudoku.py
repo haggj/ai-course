@@ -1,3 +1,5 @@
+import hashlib
+
 import numpy as np
 
 EMPTY_SPACE = 0
@@ -9,6 +11,18 @@ class SudokuBoard:
         self.size_sqrt = n
         self._board = [[EMPTY_SPACE] * self.size for i in range(self.size)]  # create an empty board
         self._board = np.array(self._board)
+
+    def __hash__(self):
+        """
+        The numpy array stores the underlying data as bytes.
+        This allows us to compute the hash of the state efficiently.
+        """
+        p = self._board.data.tobytes()
+        hash_value = hashlib.md5(p).hexdigest()
+        return int(hash_value, 16)
+
+    def __eq__(self, other):
+        return hash(self) == hash(other)
 
     def get_row(self, row):
         if not isinstance(row, int) or row < 0 or row >= self.size:
@@ -45,7 +59,9 @@ class SudokuBoard:
         return '\n'.join(all_rows)
     
     def is_legal_state(self):
-        """Check if this state is a legal state"""
+        """
+        Check if this state is a legal state.
+        """
         # Check if the numbers are unique in each row
         for row in self._board:
             if len(np.unique(row[row!=0])) != len(np.nonzero(row)[0]):
@@ -66,23 +82,32 @@ class SudokuBoard:
         return True
 
     def get_legal_moves(self):
-        """Returns a list of legal moves for the current state.
+        """
+        Returns a list of legal moves for the current state.
         """
         legal_moves = []
+        fields = set()
+        empty_fields = 0
 
         for x in range(self.size):
             for y in range(self.size):
                 if self._board[x][y] == EMPTY_SPACE:
+                    empty_fields += 1
                     for i in range(1, self.size + 1):
                         self._board[x][y] = i
                         if self.is_legal_state():
                             legal_moves.append((x, y, i))
+                            fields.add((x,y))
                     self._board[x][y] = EMPTY_SPACE
 
-        return legal_moves
+        if len(fields) == empty_fields:
+            return legal_moves
+        # If there is not a valid move for each field no solution exists
+        return []
 
     def get_first_legal_move(self):
-        """Returns the first legal move for the current state.
+        """
+        Returns the first legal move for the current state.
         """
         legal_moves = []
 
@@ -92,23 +117,52 @@ class SudokuBoard:
                     for i in range(1, self.size + 1):
                         self._board[x][y] = i
                         if self.is_legal_state():
-                            legal_moves.append((x, y, i))
-                            self._board[x][y] = EMPTY_SPACE
-                            return legal_moves
+                            return (x, y, i)
                     self._board[x][y] = EMPTY_SPACE
 
-        return legal_moves
+        raise Exception("No legal move found.")
 
-sb = SudokuBoard(n=3)
-sb._board[3,0] = 4
-legal_moves = sb.get_legal_moves()
+    def apply_move(self, move):
+        x, y, val = move
+        self._board[x][y] = val
 
-sb2 = SudokuBoard(n=3)
-legal_moves_2 = sb2.get_legal_moves()
+    def undo_move(self, move):
+        x, y, val = move
+        self._board[x][y] = EMPTY_SPACE
 
-diff = []
-for element in legal_moves_2:
-    if element not in legal_moves:
-        diff.append(element)
+    def is_complete(self):
+        for x in range(self.size):
+            for y in range(self.size):
+                if self._board[x][y] == EMPTY_SPACE:
+                    return False
+        if self.is_legal_state():
+            return True
+        raise Exception("Board complete but no in legal state.")
 
-print(diff)
+
+if __name__=="__main__":
+    sb = SudokuBoard(n=3)
+    sb._board[3,0] = 4
+    while not sb.is_complete():
+        sb.apply_move(sb.get_first_legal_move())
+        print()
+        print()
+        print(sb)
+    exit()
+
+
+    print(sb)
+    sb.apply_move(sb.get_first_legal_move())
+    print()
+    print()
+    print(sb)
+
+    sb2 = SudokuBoard(n=3)
+    legal_moves_2 = sb2.get_legal_moves()
+
+    diff = []
+    for element in legal_moves_2:
+        if element not in legal_moves:
+            diff.append(element)
+
+    print(diff)
