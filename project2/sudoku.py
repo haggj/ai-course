@@ -24,6 +24,8 @@ class SudokuBoard:
     def __eq__(self, other):
         return hash(self) == hash(other)
 
+    def set_board(self, board):
+        self._board = board
     def get_row(self, row):
         if not isinstance(row, int) or row < 0 or row >= self.size:
             raise Exception('Invalid row: ' + str(row))
