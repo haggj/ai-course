@@ -1,9 +1,15 @@
 import hashlib
+from enum import Enum
+from itertools import chain
 
 import numpy as np
 import random
 
 EMPTY_SPACE = 0
+
+class Version(Enum):
+    NAIVE = "Naive"
+    IMPROVED = "Improved"
 
 class SudokuBoard:
 
@@ -27,6 +33,7 @@ class SudokuBoard:
 
     def set_board(self, board):
         self._board = board
+
     def get_row(self, row):
         if not isinstance(row, int) or row < 0 or row >= self.size:
             raise Exception('Invalid row: ' + str(row))
@@ -84,9 +91,12 @@ class SudokuBoard:
         
         return True
 
-    def get_legal_moves(self):
+    def naive_get_legal_moves(self):
         """
-        Returns a list of legal moves for the current state.
+        Test for each empty field and each number if the resulting board is in a legal state.
+        This function iterates over the whole board to detect empty fields. It then iterates over
+        all possible values and applies them to the field. For each combination of empty field and
+        possible value, the function self.is_legal_state() is called.
         """
         legal_moves = []
         fields = set()
@@ -100,13 +110,58 @@ class SudokuBoard:
                         self._board[x][y] = i
                         if self.is_legal_state():
                             legal_moves.append((x, y, i))
-                            fields.add((x,y))
+                            fields.add((x, y))
                     self._board[x][y] = EMPTY_SPACE
 
         if len(fields) == empty_fields:
             return legal_moves
         # If there is not a valid move for each field no solution exists
         return []
+
+    def improved_get_legal_moves(self):
+        """
+        Idea: Reduce calls to self.is_legal_state() by considering the existing values in the board.
+        """
+        allowed_values = set([i for i in range(1, self.size+1)])
+
+        rows = [allowed_values.difference(set(row)) for row in self._board]
+        cols = [allowed_values.difference(set(col)) for col in self._board.T]
+
+        subgrids = []
+        for i in range(0, self.size, self.size_sqrt):
+            for j in range(0, self.size, self.size_sqrt):
+                off = self.size_sqrt
+                subgrids.append(allowed_values - set(np.unique(self._board[i:i+off, j:j+off])))
+
+        def get_subgrid_index(x,y):
+            return int(x//self.size_sqrt)*self.size_sqrt + int(y//self.size_sqrt)
+
+        legal_moves = {}
+
+        for x in range(self.size):
+            for y in range(self.size):
+                if self._board[x][y] == EMPTY_SPACE:
+                    subgrid = subgrids[get_subgrid_index(x,y)]
+                    possible_values = rows[x].intersection(cols[y]).intersection(subgrid)
+                    if not possible_values:
+                        # If there is not a valid move for each field no solution can be found
+                        return []
+                    for i in possible_values:
+                        legal_moves.setdefault((x, y), []).append((x, y, i))
+
+        a = sorted(legal_moves.values(), reverse=True, key=len)
+        res = list(chain.from_iterable(a))
+        return res
+
+    def get_legal_moves(self, version: Version = Version.NAIVE):
+        """
+        Returns a list of legal moves for the current state.
+        """
+        if version == Version.NAIVE:
+            return self.naive_get_legal_moves()
+        else:
+            return self.improved_get_legal_moves()
+
 
     def get_first_legal_move(self):
         """

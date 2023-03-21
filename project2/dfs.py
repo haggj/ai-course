@@ -1,7 +1,8 @@
-import hashlib
+import time
 from copy import deepcopy
 
-from project2.sudoku import SudokuBoard
+from CSP_Solver import CSP_Solver
+from project2.sudoku import SudokuBoard, Version
 from queue import LifoQueue
 
 
@@ -9,44 +10,72 @@ class SudokuDFS:
     def __init__(self, board: SudokuBoard):
         self.state = board
 
-    def solve(self):
-        state = self.state
+    def reset_stats(self):
+        self.visited_states = {}
+        self.revistited_states = 0
+        self.node_expansions = 0
+        self.start_time = time.time()
+        self.branches = 0
+
+    def print_stats(self, version, final=True):
+        duration = round(time.time() - self.start_time, 5)
+
+        heading = "Statistic " if final else "Debug "
+        heading += str(version)
+        msg = f"-------------{heading}--------------"
+        print("\n\n" + msg)
+        print(f"Node expansions: {self.node_expansions}")
+        print(f"Expansions/second: {self.node_expansions/duration}")
+        print(f"Average branching factor: {self.branches//self.node_expansions}")
+        print(f"Revisited states: {self.revistited_states}")
+        print(f"Duration: {duration}s")
+        print("-"*len(msg))
+
+    def solve(self, version=Version.IMPROVED):
+        self.reset_stats()
+        state = deepcopy(self.state)
         queue = LifoQueue()
         queue.put(state)
-        visited = {}
-        visits = 0
 
         while True:
             state = queue.get(False)
 
-            if state in visited:
-                print("revisited state")
+            if state in self.visited_states:
                 continue
-            visited[state] = True
+            self.visited_states[state] = True
+            self.node_expansions += 1
 
-            visits += 1
-
-            print(state)
-            print()
-            print()
-            if visits%1000==0:
-                print(visits)
+            # Debug information
+            if self.node_expansions % 1000 == 0:
+                self.print_stats(version, False)
+                print(state)
+                # exit()
 
             # Termination condition
             if state.is_complete():
-                print(visits)
+                self.print_stats(version, True)
                 return state
 
             # Append next moves
-            legal_moves = state.get_legal_moves()
-            for move in legal_moves:
-                next_state : SudokuBoard = deepcopy(state)
+            for move in state.get_legal_moves(version):
+                self.branches += 1
+                next_state: SudokuBoard = deepcopy(state)
                 next_state.apply_move(move)
                 queue.put(next_state)
 
 
-sb = SudokuBoard(n=3)
-sb._board[3,0] = 4
 
-dfs = SudokuDFS(board=sb)
-print(dfs.solve())
+# Generate sudoku via CSP solver
+solver = CSP_Solver()
+sudoku = solver.generate_unique_sudoku(3)
+
+
+# Generate sudoku manually
+sudoku = SudokuBoard(n=3)
+sudoku._board[3,0] = 4
+print(sudoku)
+
+dfs = SudokuDFS(board=sudoku)
+print(dfs.solve(Version.IMPROVED))
+# print(dfs.solve(Version.NAIVE))
+

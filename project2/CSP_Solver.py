@@ -149,7 +149,7 @@ class CSP_Solver:
         new_sb.remove_random_number()
         while unique_solutuions == 1:
             new_sb.remove_random_number()
-            unique_solutuions = solver.get_num_solutions(new_sb)
+            unique_solutuions = self.get_num_solutions(new_sb)
             if unique_solutuions == 1:
                 sb = copy.deepcopy(new_sb)
         # return last board with unique solution
