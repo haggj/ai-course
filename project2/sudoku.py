@@ -10,6 +10,7 @@ EMPTY_SPACE = 0
 class Version(Enum):
     NAIVE = "Naive"
     IMPROVED = "Improved"
+    SORTED = "Sorted"
 
 class SudokuBoard:
 
@@ -121,7 +122,7 @@ class SudokuBoard:
         # If there is not a valid move for each field no solution exists
         return []
 
-    def improved_get_legal_moves(self):
+    def improved_get_legal_moves(self, version):
         """
         Idea: Reduce calls to self.is_legal_state() by considering the existing values in the board.
         """
@@ -152,9 +153,13 @@ class SudokuBoard:
                     for i in possible_values:
                         legal_moves.setdefault((x, y), []).append((x, y, i))
 
-        a = sorted(legal_moves.values(), reverse=True, key=len)
-        res = list(chain.from_iterable(a))
+        if version == Version.SORTED:
+            sorted_list = sorted(legal_moves.values(), reverse=True, key=len)
+            res = list(chain.from_iterable(sorted_list))
+        else:
+            res = list(chain.from_iterable(legal_moves.values()))
         return res
+
 
     def get_legal_moves(self, version: Version = Version.NAIVE):
         """
@@ -163,7 +168,7 @@ class SudokuBoard:
         if version == Version.NAIVE:
             return self.naive_get_legal_moves()
         else:
-            return self.improved_get_legal_moves()
+            return self.improved_get_legal_moves(version)
 
 
     def get_first_legal_move(self):
