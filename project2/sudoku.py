@@ -43,29 +43,32 @@ class SudokuBoard:
     def __str__(self):
         """Returns a string representation of the board.
         """
-        symbol_length = len(str(self.size_sqrt))
-
         all_rows = []
+        small_space = ' '
+        big_space = '  '
 
-        for y in range(self.size):
-            row = list(self.get_row(y))
-
-            # Add vertical separators to the row.
-            for i in range(self.size - 1 - self.size_sqrt, -1, -self.size_sqrt):
-                row.insert(i + 1, '|')
-
-            # Go through the row and make sure it is properly spaced if
-            # symbols can have multiple digits.
-            if self.size > 9:
-                for i, symbol in enumerate(row):
-                    row[i] = symbol.rjust(symbol_length)
-
-            all_rows.append(' '.join(['.' if e == 0 else str(e) for e in row]))
-
-            # Add a horizontal separator, if needed.
-            if (y + 1) % self.size_sqrt == 0 and y != (self.size - 1):
-                all_rows.append('-' * ((symbol_length  * 2 * self.size_sqrt * self.size_sqrt + self.size_sqrt + 1 - (4 - self.size_sqrt))))
-
+        for x_i, row in enumerate(self._board):
+            output = ''
+            for y_i, field in enumerate(row):
+                # add number
+                output += str(field)
+                # add space if not last number in row
+                space = big_space
+                if field > 9:
+                    space = small_space
+                if y_i < self.size - 1:
+                    output += space
+                    # add seperator at end of subgrid if not last number
+                    if (y_i + 1) % self.size_sqrt == 0:
+                        output += '| '
+            # finish row
+            all_rows.append(output)
+            # add seperator at end of subgrid if not last row
+            if ((x_i + 1) <= self.size - 1) and ((x_i + 1) % self.size_sqrt == 0):
+                seperator = ''
+                for char in output:
+                    seperator += '-'
+                all_rows.append(seperator)
         return '\n'.join(all_rows)
     
     def is_legal_state(self):
