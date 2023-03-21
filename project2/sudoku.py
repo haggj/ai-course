@@ -1,6 +1,7 @@
 import hashlib
 
 import numpy as np
+import random
 
 EMPTY_SPACE = 0
 
@@ -140,6 +141,18 @@ class SudokuBoard:
         if self.is_legal_state():
             return True
         raise Exception("Board complete but no in legal state.")
+
+    # removes a random number from board
+    def remove_random_number(self):
+        x = random.randrange(0, self.size)
+        y = random.randrange(0, self.size)
+        # if random field is not null remove number
+        if self._board[x][y] != 0:
+            self._board[x][y] = 0
+        # repeat until none empty field found
+        else:
+            # TODO: !!! Infinite Loop on empty board !!!
+            self.remove_random_number()
 
 
 if __name__=="__main__":

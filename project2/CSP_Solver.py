@@ -80,7 +80,11 @@ class CSP_Solver:
 
     # Solve Sudoku
     # Save first found Solution in self.board
-    def solve_csp(self):
+    def solve_csp(self, board: SudokuBoard):
+        # initialize Board
+        self.board = board._board
+        self.board_size = board.size
+        self.board_size_sqrt = board.size_sqrt
         # create the model
         self.setup_csp()
         # create the solver
@@ -102,7 +106,7 @@ class CSP_Solver:
 
     # return number of unique & valid solutions
     # return -1 if no solution
-    def get_num_solutions(self, board=SudokuBoard(3)):
+    def get_num_solutions(self, board: SudokuBoard):
         # initialize Board
         self.board = board
         self.board = board._board
@@ -131,14 +135,31 @@ class CSP_Solver:
             print("ERROR: Solution Status unexpected!")
             return -1
 
-# measure Time
-start = time.time()
-board = SudokuBoard(5)
-solver = CSP_Solver(board)
-solver.solve_csp()
-#solver.get_num_solutions(board)
 
-#board.set_board(solver.board)
-#print(board)
-end = time.time()
-print("CSP took: ", end - start, "seconds")
+if __name__=="__main__":
+    # measure Time
+    start = time.time()
+
+    # create Board
+    board = SudokuBoard(3)
+    solver = CSP_Solver()
+
+    # Solve Board
+    solver.solve_csp(board)
+    # print solition
+    board.set_board(solver.board)
+    print(board)
+    print('----------------------------')
+
+    # remove random number until
+    # no unique solution
+    print('remove 5 random numbers\n')
+    for i in range(5):
+        board.remove_random_number()
+    print(board)
+    solver.solve_csp(board)
+    #print(solver.get_num_solutions(board))
+
+    # calculate elapsed Time
+    end = time.time()
+    print("CSP took: ", end - start, "seconds")
