@@ -2,13 +2,14 @@ import time
 from copy import deepcopy
 
 from CSP_Solver import CSP_Solver
-from project2.sudoku import SudokuBoard, Version
+from sudoku import SudokuBoard, Version
 from queue import LifoQueue
 
 
 class SudokuDFS:
     def __init__(self, board: SudokuBoard):
         self.state = board
+        self.reset_stats()
 
     def reset_stats(self):
         self.visited_states = {}
@@ -63,7 +64,36 @@ class SudokuDFS:
                 next_state.apply_move(move)
                 queue.put(next_state)
 
+    def solve_recursive(self, state: SudokuBoard, version=Version.IMPROVED):
+        if state in self.visited_states:
+            return None
+        self.visited_states[state] = True
+        self.node_expansions += 1
 
+        # Termination condition
+        if state.is_complete():
+            return state
+        
+        # Debug information
+        if self.node_expansions % 1000 == 0:
+            self.print_stats(version, False)
+            print(state)
+
+        # Append next moves
+        for move in state.get_legal_moves(version):
+            self.branches += 1
+            #next_state: SudokuBoard = deepcopy(state)
+            #next_state.apply_move(move)
+            state.apply_move(move)
+            result = self.solve_recursive(state, version)
+            if state.is_complete():
+                return state
+            else:
+                state.undo_move(move)
+            if result is not None:
+                return result
+
+        return None
 
 # Generate sudoku via CSP solver
 solver = CSP_Solver()
@@ -76,6 +106,6 @@ sudoku._board[3,0] = 4
 print(sudoku)
 
 dfs = SudokuDFS(board=sudoku)
-print(dfs.solve(Version.IMPROVED))
+#print(dfs.solve(Version.IMPROVED))
+print(dfs.solve_recursive(sudoku,Version.IMPROVED))
 # print(dfs.solve(Version.NAIVE))
-
