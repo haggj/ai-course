@@ -1,3 +1,5 @@
+import copy
+
 from sudoku import SudokuBoard
 from ortools.sat.python import cp_model
 
@@ -34,7 +36,16 @@ class CSP_Solver:
 
     # Create CSP Variables
     # Setup all Constraints depending on Board & Sudoku Rules
-    def setup_csp(self):
+    def setup_csp(self, board: SudokuBoard):
+        # initialize Board
+        self.board = board._board
+        self.board_size = board.size
+        self.board_size_sqrt = board.size_sqrt
+        # clean CSP environment
+        self.model = cp_model.CpModel()
+        self.solution_counter = VarArraySolutionCounter()
+        self.variables = []
+        self.solver_variables = []
         # Create all variables
         for i_x, row in enumerate(self.board):
             var_row = []
@@ -81,12 +92,8 @@ class CSP_Solver:
     # Solve Sudoku
     # Save first found Solution in self.board
     def solve_csp(self, board: SudokuBoard):
-        # initialize Board
-        self.board = board._board
-        self.board_size = board.size
-        self.board_size_sqrt = board.size_sqrt
         # create the model
-        self.setup_csp()
+        self.setup_csp(board)
         # create the solver
         solver = cp_model.CpSolver()
         # find first solution
@@ -107,58 +114,68 @@ class CSP_Solver:
     # return number of unique & valid solutions
     # return -1 if no solution
     def get_num_solutions(self, board: SudokuBoard):
-        # initialize Board
-        self.board = board
-        self.board = board._board
-        self.board_size = board.size
-        self.board_size_sqrt = board.size_sqrt
         # create the model
-        self.setup_csp()
+        self.setup_csp(board)
         # create the solver
         solver = cp_model.CpSolver()
         # find all solutions
         status = solver.SearchForAllSolutions(self.model, self.solution_counter)
         if status == cp_model.INFEASIBLE:
-            print("ERROR: Model does not have a solution!")
+            #print("ERROR: Model does not have a solution!")
             return -1
         elif status == cp_model.FEASIBLE:
-            print("Solution is FEASIBLE")
+            #print("Solution is FEASIBLE")
             n = self.solution_counter.solution_count()
-            print("%d solution(s) found." % n)
+            #print("%d solution(s) found." % n)
             return n
         elif status == cp_model.OPTIMAL:
-            print("Solution is OPTIMAL")
+            #print("Solution is OPTIMAL")
             n = self.solution_counter.solution_count()
-            print("%d solution(s) found." % n)
+            #print("%d solution(s) found." % n)
             return n
         else:
-            print("ERROR: Solution Status unexpected!")
+            #print("ERROR: Solution Status unexpected!")
             return -1
 
+    def generate_unique_sudoku(self, size=3):
+        # generate a fully solved board of size: size
+        sb = SudokuBoard(size)
+        self.solve_csp(sb)
+        sb.set_board(self.board)
+        # remove random numbers until
+        # no unique solution
+        new_sb = copy.deepcopy(sb)
+        unique_solutuions = 1
+        new_sb.remove_random_number()
+        while unique_solutuions == 1:
+            new_sb.remove_random_number()
+            unique_solutuions = solver.get_num_solutions(new_sb)
+            if unique_solutuions == 1:
+                sb = copy.deepcopy(new_sb)
+        # return last board with unique solution
+        return sb
 
 if __name__=="__main__":
     # measure Time
     start = time.time()
 
-    # create Board
-    board = SudokuBoard(3)
     solver = CSP_Solver()
 
-    # Solve Board
-    solver.solve_csp(board)
-    # print solition
-    board.set_board(solver.board)
-    print(board)
-    print('----------------------------')
+    # # create Board
+    # board = SudokuBoard(2)
+    # board._board[3, 0] = 4
+    #
+    # # Solve Board
+    # solver.solve_csp(board)
+    # # print solition
+    # board.set_board(solver.board)
+    # print(board)
+    # print('----------------------------')
 
-    # remove random number until
-    # no unique solution
-    print('remove 5 random numbers\n')
-    for i in range(5):
-        board.remove_random_number()
-    print(board)
-    solver.solve_csp(board)
-    #print(solver.get_num_solutions(board))
+    # generate a Sudoku Board
+    sb = solver.generate_unique_sudoku(3)
+    print(sb)
+    print(solver.get_num_solutions(sb))
 
     # calculate elapsed Time
     end = time.time()
