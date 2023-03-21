@@ -91,11 +91,12 @@ class CSP_Solver:
 
     # Solve Sudoku
     # Save first found Solution in self.board
-    def solve_csp(self, board: SudokuBoard):
+    def solve_csp(self, board: SudokuBoard, seed=None):
         # create the model
         self.setup_csp(board)
         # create the solver
         solver = cp_model.CpSolver()
+        solver.parameters.random_seed = seed
         # find first solution
         status = solver.Solve(self.model)
         if status == cp_model.INFEASIBLE:
@@ -140,7 +141,7 @@ class CSP_Solver:
     def generate_unique_sudoku(self, size=3, seed=None):
         # generate a fully solved board of size: size
         sb = SudokuBoard(size, seed=seed)
-        self.solve_csp(sb)
+        self.solve_csp(sb, seed=seed)
         sb.set_board(self.board)
         # remove random numbers until
         # no unique solution
