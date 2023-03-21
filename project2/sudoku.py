@@ -14,11 +14,13 @@ class Version(Enum):
 
 class SudokuBoard:
 
-    def __init__(self, n=3):
+    def __init__(self, n=3, seed=None):
         self.size = n*n
         self.size_sqrt = n
         self._board = [[EMPTY_SPACE] * self.size for i in range(self.size)]  # create an empty board
         self._board = np.array(self._board)
+        self._seed = seed
+        random.seed(seed)
 
     def __hash__(self):
         """

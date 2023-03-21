@@ -137,9 +137,9 @@ class CSP_Solver:
             #print("ERROR: Solution Status unexpected!")
             return -1
 
-    def generate_unique_sudoku(self, size=3):
+    def generate_unique_sudoku(self, size=3, seed=None):
         # generate a fully solved board of size: size
-        sb = SudokuBoard(size)
+        sb = SudokuBoard(size, seed=seed)
         self.solve_csp(sb)
         sb.set_board(self.board)
         # remove random numbers until
