@@ -29,7 +29,7 @@ class SudokuBoard:
         """
         p = self._board.data.tobytes()
         hash_value = hashlib.md5(p).hexdigest()
-        return int(hash_value, 16)
+        return int(hash_value, 16) % 10 ** 16
 
     def __eq__(self, other):
         return hash(self) == hash(other)
@@ -54,7 +54,7 @@ class SudokuBoard:
             output = ''
             for y_i, field in enumerate(row):
                 # add number
-                output += str(field)
+                output += str("." if field == 0 else field)
                 # add space if not last number in row
                 space = big_space
                 if field > 9:

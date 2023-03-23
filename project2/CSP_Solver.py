@@ -96,7 +96,8 @@ class CSP_Solver:
         self.setup_csp(board)
         # create the solver
         solver = cp_model.CpSolver()
-        solver.parameters.random_seed = seed
+        if seed:
+            solver.parameters.random_seed = seed
         # find first solution
         status = solver.Solve(self.model)
         if status == cp_model.INFEASIBLE:

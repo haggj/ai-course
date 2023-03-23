@@ -58,6 +58,7 @@ class SudokuDFS:
             state = queue.get(False)
 
             if state in self.visited_states:
+                self.revistited_states += 1
                 continue
             self.visited_states[state] = True
             self.node_expansions += 1
@@ -66,30 +67,43 @@ class SudokuDFS:
             if self.node_expansions % 1000 == 0:
                 self.print_stats(version, False)
                 print(state)
-                # exit()
 
             # Termination condition
             if state.is_complete():
                 self.print_stats(version, True)
+                print(state)
                 return state
 
             # Append next moves
+            legal_moves = state.get_legal_moves(version)
+            self.update_branching_factor(len(legal_moves))
             for move in state.get_legal_moves(version):
-                self.branches += 1
                 next_state: SudokuBoard = deepcopy(state)
                 next_state.apply_move(move)
                 queue.put(next_state)
 
     def solve_recursive(self, state: SudokuBoard, version=Version.IMPROVED):
+        self.reset_stats()
+        return self._solve_recursive(deepcopy(state), version)
+
+    def _solve_recursive(self, state: SudokuBoard, version=Version.IMPROVED):
+
         if state in self.visited_states:
+            self.revistited_states += 1
             return None
-        self.visited_states[state] = True
+
+        # Store the hash of the object in the dict, because we are operating on the same object
+        # all the time. This messes with the detection, if the current state was analyzed before
+        # if using self.visited_states[state] = True
+        self.visited_states[hash(state)] = True
         self.node_expansions += 1
 
         # Termination condition
         if state.is_complete():
+            self.print_stats(version, True)
+            print(state)
             return state
-        
+
         # Debug information
         if self.node_expansions % 1000 == 0:
             self.print_stats(version, False)
@@ -97,32 +111,25 @@ class SudokuDFS:
 
         # Append next moves
         legal_moves = state.get_legal_moves(version)
+        legal_moves.reverse()
         self.update_branching_factor(len(legal_moves))
         for move in legal_moves:
-            self.branches += 1
-            #next_state: SudokuBoard = deepcopy(state)
-            #next_state.apply_move(move)
             state.apply_move(move)
-            result = self.solve_recursive(state, version)
-            if state.is_complete():
-                return state
-            else:
-                state.undo_move(move)
-            if result is not None:
+            result = self._solve_recursive(state, version)
+            state.undo_move(move)
+            if result:
                 return result
-
         return None
 
 # Generate sudoku via CSP solver
 solver = CSP_Solver()
-sudoku = solver.generate_unique_sudoku(3, 10)
+sudoku = solver.generate_unique_sudoku(6, 40)
 
 # Generate sudoku manually
 #sudoku = SudokuBoard(n=3, seed=10)
 #sudoku._board[3,0] = 4
 print(sudoku)
-exit()
 dfs = SudokuDFS(board=sudoku)
-print(dfs.solve(Version.SORTED))
-#print(dfs.solve_recursive(sudoku,Version.SORTED))
+dfs.solve(Version.SORTED)
+dfs.solve_recursive(sudoku, Version.SORTED)
 # print(dfs.solve(Version.NAIVE))
