@@ -20,13 +20,15 @@ class SudokuDFS:
         self.branches = 0
         self.invalid_states = 0
 
-    def print_stats(self, version, final=True):
+    def print_stats(self, version, final=True, recursive=False):
         duration = round(time.time() - self.start_time, 5)
 
         heading = "Statistic " if final else "Debug "
-        heading += str(version)
         msg = f"-------------{heading}--------------"
+
         print("\n\n" + msg)
+        print("Version: " + str(version))
+        print("Recursion: " + str(recursive))
         print(f"Node expansions: {self.node_expansions}")
         print(f"Expansions/second: {self.node_expansions/duration}")
         print(f"Average branching factor: {self.branching_factor}")
@@ -100,13 +102,13 @@ class SudokuDFS:
 
         # Termination condition
         if state.is_complete():
-            self.print_stats(version, True)
+            self.print_stats(version, True, True)
             print(state)
             return state
 
         # Debug information
         if self.node_expansions % 1000 == 0:
-            self.print_stats(version, False)
+            self.print_stats(version, False, True)
             print(state)
 
         # Append next moves
@@ -116,20 +118,26 @@ class SudokuDFS:
         for move in legal_moves:
             state.apply_move(move)
             result = self._solve_recursive(state, version)
-            state.undo_move(move)
             if result:
                 return result
+            state.undo_move(move)
         return None
 
 # Generate sudoku via CSP solver
 solver = CSP_Solver()
-sudoku = solver.generate_unique_sudoku(6, 40)
+sudoku = solver.generate_unique_sudoku(3, 40)
 
 # Generate sudoku manually
 #sudoku = SudokuBoard(n=3, seed=10)
 #sudoku._board[3,0] = 4
 print(sudoku)
+
+
 dfs = SudokuDFS(board=sudoku)
-dfs.solve(Version.SORTED)
-dfs.solve_recursive(sudoku, Version.SORTED)
-# print(dfs.solve(Version.NAIVE))
+sol1 = dfs.solve(Version.SORTED)
+sol2 = dfs.solve(Version.STORE_LEGAL)
+sol3 = dfs.solve_recursive(sudoku, Version.SORTED)
+sol4 = dfs.solve_recursive(sudoku, Version.STORE_LEGAL)
+assert sol1 == sol2
+assert sol2 == sol3
+assert sol3 == sol4
