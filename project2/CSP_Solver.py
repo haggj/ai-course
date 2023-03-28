@@ -110,6 +110,9 @@ class CSP_Solver:
             for x in range(0, self.board_size):
                 for y in range(0, self.board_size):
                     self.board[x][y] = solver.Value(self.variables[x][y])
+            print(solver.SolutionInfo())
+            print(solver.NumBranches())
+            print(solver.NumConflicts())
         else:
             print("ERROR: Solution Status unexpected!")
 
@@ -158,9 +161,6 @@ class CSP_Solver:
         return sb
 
 if __name__=="__main__":
-    # measure Time
-    start = time.time()
-
     solver = CSP_Solver()
 
     # # create Board
@@ -179,6 +179,9 @@ if __name__=="__main__":
     print(sb)
     print(solver.get_num_solutions(sb))
 
+    # measure Time
+    start = time.time()
+    solver.solve_csp(sb)
     # calculate elapsed Time
     end = time.time()
     print("CSP took: ", end - start, "seconds")

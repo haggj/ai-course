@@ -132,6 +132,12 @@ sudoku = solver.generate_unique_sudoku(3, 40)
 #sudoku._board[3,0] = 4
 print(sudoku)
 
+start = time.time()
+solver.solve_csp(sudoku)
+print(solver.board)
+# calculate elapsed Time
+end = time.time()
+print("CSP took: ", end - start, "seconds")
 
 dfs = SudokuDFS(board=sudoku)
 sol1 = dfs.solve(Version.SORTED)
