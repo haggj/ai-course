@@ -92,8 +92,9 @@ class CSP_Solver:
     # Solve Sudoku
     # Save first found Solution in self.board
     def solve_csp(self, board: SudokuBoard, seed=None):
+        start = time.time()
         # create the model
-        self.setup_csp(board)
+        self.setup_csp(copy.deepcopy(board))
         # create the solver
         solver = cp_model.CpSolver()
         if seed:
@@ -115,6 +116,9 @@ class CSP_Solver:
             print(solver.NumConflicts())
         else:
             print("ERROR: Solution Status unexpected!")
+        end = time.time()
+        print("CSP took: ", end - start, "seconds")
+        print(self.board)
 
     # return number of unique & valid solutions
     # return -1 if no solution
