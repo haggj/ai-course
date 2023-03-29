@@ -8,14 +8,75 @@ import random
 EMPTY_SPACE = 0
 
 class Version(Enum):
-    # Iterate over all empty fields and check which numbers yield legal state
+
     NAIVE = "Naive"
-    # Use assigned values to find allowed moves for each field
+    """
+    Iterate over all empty fields and check which numbers yield legal state.
+
+    Description:
+    The initial version of our algorithm was the \verb|Naive| implementation.
+    For a given state this version iterates over all fields of the board.
+    For each empty fields this implementation assigns all allowed values to this empty field.
+    For each assigned value it then checks if the resulting field is still in a valid state or not.
+    Therefore, the function \verb|is_legal_state()| is called for each possible value on each empty field.
+    If the field is sill in a valid state, the particular move is considered to be legal.
+
+    Evaluation:
+    This version is very inefficient because it loops multiple times over the field to determine a 
+    single valid move. This makes the computation of all legal moves for a given state very slow.
+    """
+
+
     IMPROVED = "Improved"
-    # Same as improved, but sort moves by the number of possible moves per field
+    """
+    Use assigned values to find allowed moves for each field.
+    
+    Description:
+    This improved version avoids any call to \verb|is_legal_state()| to improve the performance of the search.
+    This is realized by actively computing the valid moves for a given empty field.
+    Based on the values found in the row, column and subgrid the empty field belongs to, one can compute the values which can be assigned to the empty field.
+    
+    Evaluation:
+    This version improves the inefficient \verb|Naive| implementation.
+    However, it still suffers from a huge branching factor and is not able to find a solution for
+    a given field in a short period of time.
+    """
+
     SORTED = "Sorted"
-    # Compute the allowed values per field and store them. Update values if moves are applied.
+    """
+    Same as improved, but sort moves by the number of possible moves per field.
+    
+    Description:
+    This implementation is almost the same than the \verb|Improved| version.
+    The only difference is that the returned legal moves are sorted.
+    We want to make sure, that the DFS applies moves to fields first, which have less options available.
+    This speeds up the algorithm because usually a Sudoko field is solved most efficiently by assigning values to those fields first, which have only one option left.
+    If a field has only one option left, there is no other value we can assign to it.
+    Thus, we can be sure that we do not have to backtrack our DFS tree assuming there is a unique solution to the field.
+    
+    Evaluation:
+    By sorting the legal moves by the amount of moves per field we can solve Sudoku fields with a unique solution efficiently.
+    Effectively, this bypasses the huge branching factor if a unique solution exists.
+    If there might be more than one solution the branching factor still heavily influences the search tree.
+    """
+
     STORE_LEGAL = "Store"
+    """
+    Compute the allowed values per field and store them. Update values if moves are applied.
+    
+    Description:
+    The  \verb|Improved| and  \verb|Sorted| versions compute the allowed values for an empty field based on the corresponding row, colum and subgrid.
+    However, they perform this computation for each field again if \verb|get_legal_moves()| is computed.
+    This can be avoided by caching the result of this computation.
+    This implementation introduces a cache which stores the values which can be assigned to each field.
+    Once a move is applied, all affected fields of the cache are updated.
+    
+    Evaluation:
+    Since this approach introduces additional data structures, the deepcopy operation is more expensive in terms of time and memory.
+    As a result, the non-recursive implementation is even slower than if we are using the \verb|Sorted| approach.
+    However, if we avoid to deepcopy the state by relying on a recursive implementation of DFS, this version is the most efficient one.
+    It even outperforms the CSP solver by ORTools for fields which have a unique solution.
+    """
 
 class SudokuBoard:
 
