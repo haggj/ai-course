@@ -91,11 +91,17 @@ class CSP_Solver:
 
     # Solve Sudoku
     # Save first found Solution in self.board
-    def solve_csp(self, board: SudokuBoard, seed=None):
+    def solve_csp(self, board: SudokuBoard, seed=None, decision_strategy=None):
         # create the model
         self.setup_csp(board)
         # create the solver
         solver = cp_model.CpSolver()
+        #solver.parameters.log_search_progress = True
+        #solver.log_callback = print
+        if decision_strategy:
+            self.model.AddDecisionStrategy(self.solver_variables, decision_strategy, cp_model.SELECT_MIN_VALUE)
+            solver.parameters.search_branching = cp_model.FIXED_SEARCH
+
         if seed:
             solver.parameters.random_seed = seed
         # find first solution
@@ -142,7 +148,8 @@ class CSP_Solver:
             #print("ERROR: Solution Status unexpected!")
             return -1
 
-    def generate_unique_sudoku(self, size=3, seed=None):
+    def generate_unique_sudoku(self, size=3, seed=None, return_removed_numbers=False):
+        removed_numbers = 0
         # generate a fully solved board of size: size
         sb = SudokuBoard(size, seed=seed)
         self.solve_csp(sb, seed=seed)
@@ -153,11 +160,14 @@ class CSP_Solver:
         unique_solutuions = 1
         new_sb.remove_random_number()
         while unique_solutuions == 1:
+            removed_numbers += 1
             new_sb.remove_random_number()
             unique_solutuions = self.get_num_solutions(new_sb)
             if unique_solutuions == 1:
                 sb = copy.deepcopy(new_sb)
-        # return last board with unique solution
+        # return last board with unique solution, and number of removed numbers if return_removed_numbers is True
+        if return_removed_numbers:
+            return sb, removed_numbers
         return sb
 
 if __name__=="__main__":
@@ -176,12 +186,28 @@ if __name__=="__main__":
 
     # generate a Sudoku Board
     sb = solver.generate_unique_sudoku(3)
+
+    #sb = SudokuBoard(n=3, seed=10)
+    #sb._board[3,0] = 4
+
     print(sb)
-    print(solver.get_num_solutions(sb))
+    #print(solver.get_num_solutions(sb))
 
     # measure Time
     start = time.time()
-    solver.solve_csp(sb)
+    solver.solve_csp(sb, decision_strategy=cp_model.CHOOSE_FIRST)
+    # calculate elapsed Time
+    end = time.time()
+    print("CSP took: ", end - start, "seconds")
+
+    start = time.time()
+    solver.solve_csp(sb, decision_strategy=cp_model.CHOOSE_MIN_DOMAIN_SIZE)
+    # calculate elapsed Time
+    end = time.time()
+    print("CSP took: ", end - start, "seconds")
+
+    start = time.time()
+    solver.solve_csp(sb, decision_strategy=cp_model.CHOOSE_MAX_DOMAIN_SIZE)
     # calculate elapsed Time
     end = time.time()
     print("CSP took: ", end - start, "seconds")
