@@ -132,12 +132,12 @@ solver = CSP_Solver()
 sudoku = solver.generate_unique_sudoku(3, 40)
 
 # Generate sudoku manually
-sudoku = SudokuBoard(n=3, seed=10)
+#sudoku = SudokuBoard(n=3, seed=10)
 print(sudoku)
 
 
 # CSP solver
-solver.solve_csp(deepcopy(sudoku))
+solver.solve_csp(deepcopy(sudoku), log_stats=True)
 
 dfs = SudokuDFS(board=sudoku)
 sol1 = dfs.solve(Version.SORTED)

@@ -91,7 +91,7 @@ class CSP_Solver:
 
     # Solve Sudoku
     # Save first found Solution in self.board
-    def solve_csp(self, board: SudokuBoard, seed=None, decision_strategy=None):
+    def solve_csp(self, board: SudokuBoard, seed=None, decision_strategy=None, num_workers=None, log_stats=False):
         start = time.time()
         # create the model
         self.setup_csp(copy.deepcopy(board))
@@ -99,6 +99,8 @@ class CSP_Solver:
         solver = cp_model.CpSolver()
         #solver.parameters.log_search_progress = True
         #solver.log_callback = print
+        if num_workers:
+            solver.parameters.num_search_workers = num_workers  # use x cores
         if decision_strategy:
             self.model.AddDecisionStrategy(self.solver_variables, decision_strategy, cp_model.SELECT_MIN_VALUE)
             solver.parameters.search_branching = cp_model.FIXED_SEARCH
@@ -112,19 +114,28 @@ class CSP_Solver:
         elif status == cp_model.FEASIBLE:
             print("Solution is FEASIBLE")
         elif status == cp_model.OPTIMAL:
-            print("Solution is OPTIMAL")
+            #print("Solution is OPTIMAL")
             # Create Sudoku Board from Solved Result
             for x in range(0, self.board_size):
                 for y in range(0, self.board_size):
                     self.board[x][y] = solver.Value(self.variables[x][y])
-            print(solver.SolutionInfo())
-            print(solver.NumBranches())
-            print(solver.NumConflicts())
+            if log_stats:
+                print()
+                print()
+                print('-----------CSP-Statistic ------------')
+                print('Decision Strategy: ' + str(decision_strategy))
+                print('Solution: Optimal')
+                print('Number Branches: ' + str(solver.NumBranches()))
+                print('Number Conflicts:' + str(solver.NumConflicts()))
+                if num_workers:
+                    print('Workers: ' + str(num_workers))
         else:
             print("ERROR: Solution Status unexpected!")
         end = time.time()
-        print("CSP took: ", end - start, "seconds")
-        print(self)
+        if log_stats:
+            print('Duration: ' + str(end - start) + 's')
+            print('-------------------------------------')
+            print(self)
 
     def __str__(self):
         """
@@ -249,21 +260,48 @@ if __name__=="__main__":
     # calculate elapsed Time
     end = time.time()
     print("CSP took: ", end - start, "seconds")
+    print()
 
     start = time.time()
     solver.solve_csp(sb, decision_strategy=cp_model.CHOOSE_FIRST)
     # calculate elapsed Time
     end = time.time()
-    print("CSP took: ", end - start, "seconds")
+    print("CSP (CHOOSE_FIRST) took: ", end - start, "seconds")
+    print()
 
     start = time.time()
     solver.solve_csp(sb, decision_strategy=cp_model.CHOOSE_MIN_DOMAIN_SIZE)
     # calculate elapsed Time
     end = time.time()
-    print("CSP took: ", end - start, "seconds")
+    print("CSP (CHOOSE_MIN_DOMAIN_SIZE) took: ", end - start, "seconds")
+    print()
 
     start = time.time()
     solver.solve_csp(sb, decision_strategy=cp_model.CHOOSE_MAX_DOMAIN_SIZE)
     # calculate elapsed Time
     end = time.time()
+    print("CSP (CHOOSE_MAX_DOMAIN_SIZE) took: ", end - start, "seconds")
+
+    start = time.time()
+    solver.solve_csp(sb, decision_strategy=None, num_workers=None)
+    # calculate elapsed Time
+    end = time.time()
     print("CSP took: ", end - start, "seconds")
+
+    start = time.time()
+    solver.solve_csp(sb, decision_strategy=None, num_workers=1)
+    # calculate elapsed Time
+    end = time.time()
+    print("CSP (1) took: ", end - start, "seconds")
+
+    start = time.time()
+    solver.solve_csp(sb, decision_strategy=None, num_workers=3)
+    # calculate elapsed Time
+    end = time.time()
+    print("CSP (3) took: ", end - start, "seconds")
+
+    start = time.time()
+    solver.solve_csp(sb, decision_strategy=None, num_workers=5)
+    # calculate elapsed Time
+    end = time.time()
+    print("CSP (5) took: ", end - start, "seconds")
