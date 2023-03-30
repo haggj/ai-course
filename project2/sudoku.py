@@ -195,8 +195,7 @@ class SudokuBoard:
         self._board[x][y] = EMPTY_SPACE
 
         if hasattr(self, "_move_cache"):
-            self.update_move_cache(move, reverse=True)
-            self._move_cache[(x,y)] = self.get_move_cache((x,y))
+            self._move_cache = self.get_move_cache()
 
     def is_complete(self):
         """
@@ -208,6 +207,7 @@ class SudokuBoard:
                     return False
         if self.is_legal_state():
             return True
+        print(self)
         raise Exception("Board complete but no in legal state.")
 
     def remove_random_number(self):
@@ -362,39 +362,47 @@ class SudokuBoard:
         Returns a list of coordinates, which are either in the same row, colum or subgrid as the
         given coordinates.
         """
-        affected = set()
+        row = set()
+        col = set()
+        subgrid = set()
+
         # Get fields of same row and column
         for j in range(self.size):
-            affected.add((x, j))
-            affected.add((j, y))
+            row.add((x, j))
+            col.add((j, y))
 
         # Get fields of same subgrid
         i_start = x - x % self.size_sqrt
         j_start = y - y % self.size_sqrt
         for i in range(self.size_sqrt):
             for j in range(self.size_sqrt):
-                affected.add((i_start + i, j_start + j))
-        return affected
+                subgrid.add((i_start + i, j_start + j))
+        return row, col, subgrid
 
-    def update_move_cache(self, move, reverse=False):
+    def update_move_cache(self, move):
         """
         Update the move_cache based on the given move.
         If reversed is True, the specified move is reversed.
         """
         x, y, val = move
-        for i,j in self.get_affected_coordinates(x,y):
-            if (i,j) not in self._move_cache:
-                continue
-            if reverse:
-                # Add value again -> reverse the move
-                self._move_cache[(i,j)].add(val)
-            else:
-                # Remove value from allowed actions
-                self._move_cache[(i,j)].discard(val)
+        for group in self.get_affected_coordinates(x,y):
+            remaining = set()
+            fields = 0
+            for field in group:
+                if field not in self._move_cache:
+                    continue
+                # Recompute affected cells
+                fields += 1
+                if val in self._move_cache[field]:
+                    self._move_cache[field].remove(val)
+
+                remaining = remaining.union(self._move_cache[field])
+            if len(remaining) < fields:
+                self._move_cache[(0,0)] = set()
 
     def cache_get_legal_moves(self):
         """
-
+        Compute legal moves based on cached moves.
         """
         if not hasattr(self, "_move_cache"):
             self._move_cache = self.get_move_cache()
@@ -402,6 +410,9 @@ class SudokuBoard:
         legal_moves = []
         for ((x,y), moves) in sorted(self._move_cache.items(), reverse=True, key=lambda item: len(item[1])):
             # print(f"{x}\t{y} -> {moves}")
+            if not moves:
+                return []
+
             for move in moves:
                 legal_moves.append((x, y, move))
         return legal_moves
