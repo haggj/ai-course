@@ -124,7 +124,39 @@ class CSP_Solver:
             print("ERROR: Solution Status unexpected!")
         end = time.time()
         print("CSP took: ", end - start, "seconds")
-        print(self.board)
+        print(self)
+
+    def __str__(self):
+        """
+        Returns a string representation of the board.
+        """
+        all_rows = []
+        small_space = ' '
+        big_space = '  '
+
+        for x_i, row in enumerate(self.board):
+            output = ''
+            for y_i, field in enumerate(row):
+                # add number
+                output += str("." if field == 0 else field)
+                # add space if not last number in row
+                space = big_space
+                if field > 9:
+                    space = small_space
+                if y_i < self.board_size - 1:
+                    output += space
+                    # add seperator at end of subgrid if not last number
+                    if (y_i + 1) % self.board_size_sqrt == 0:
+                        output += '| '
+            # finish row
+            all_rows.append(output)
+            # add seperator at end of subgrid if not last row
+            if ((x_i + 1) <= self.board_size - 1) and ((x_i + 1) % self.board_size_sqrt == 0):
+                seperator = ''
+                for char in output:
+                    seperator += '-'
+                all_rows.append(seperator)
+        return '\n'.join(all_rows)
 
     # return number of unique & valid solutions
     # return -1 if no solution
@@ -173,6 +205,18 @@ class CSP_Solver:
         if return_removed_numbers:
             return sb, removed_numbers
         return sb
+    
+    def generate_random_sudoku(self, size=3, seed=None, remove_numbers=1):
+        removed_numbers = 0
+        # generate a fully solved board of size: size
+        sb = SudokuBoard(size, seed=seed)
+        self.solve_csp(sb, seed=seed)
+        sb.set_board(self.board)
+
+        # remove remove_numbers random numbers
+        for i in range(remove_numbers):
+            sb.remove_random_number()
+        return sb
 
 if __name__=="__main__":
     solver = CSP_Solver()
@@ -190,6 +234,8 @@ if __name__=="__main__":
 
     # generate a Sudoku Board
     sb = solver.generate_unique_sudoku(3)
+    #sb = solver.generate_random_sudoku(3, remove_numbers=70)
+
 
     #sb = SudokuBoard(n=3, seed=10)
     #sb._board[3,0] = 4
@@ -198,6 +244,12 @@ if __name__=="__main__":
     #print(solver.get_num_solutions(sb))
 
     # measure Time
+    start = time.time()
+    solver.solve_csp(sb, decision_strategy=None)
+    # calculate elapsed Time
+    end = time.time()
+    print("CSP took: ", end - start, "seconds")
+
     start = time.time()
     solver.solve_csp(sb, decision_strategy=cp_model.CHOOSE_FIRST)
     # calculate elapsed Time
