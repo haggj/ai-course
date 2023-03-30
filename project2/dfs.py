@@ -36,6 +36,7 @@ class SudokuDFS:
         print(f"Invalid states: {self.invalid_states}")
         print(f"Duration: {duration}s")
         print("-"*len(msg))
+        self.duration = duration
 
     def update_branching_factor(self, val):
         if val == 0:
