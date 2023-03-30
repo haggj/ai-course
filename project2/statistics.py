@@ -1,9 +1,10 @@
 import numpy as np
 from CSP_Solver import CSP_Solver
+from dfs import SudokuDFS
 from sudoku import SudokuBoard, Version
 from matplotlib import pyplot as plt
 from ortools.sat.python import cp_model
-
+from copy import deepcopy
 import time
 
 class Statistics:
@@ -77,7 +78,47 @@ class Statistics:
         plt.show()
         return
     
+    def compare_DFS_strategies(self, sudoku_size, n):
+        times = [[] for i in range(5)]
+        for i in range(n):
+            solver = CSP_Solver()
+            sudoku = solver.generate_unique_sudoku(sudoku_size)
+            start = time.time()
+            solver.solve_csp(sudoku, decision_strategy=None)
+            end = time.time()
+            times[0].append(end-start)
+            dfs = SudokuDFS(board=sudoku)
+            sol1 = dfs.solve(Version.SORTED)
+            times[4].append(dfs.duration)
+            sol2 = dfs.solve(Version.STORE_LEGAL)
+            times[2].append(dfs.duration)
+            sol3 = dfs.solve_recursive(sudoku, Version.SORTED)
+            times[3].append(dfs.duration)
+            sol4 = dfs.solve_recursive(sudoku, Version.STORE_LEGAL)
+            times[1].append(dfs.duration)
+        # print("Times: ", times)
+        avg_time = [np.mean(t) for t in times]
+        std_time = [np.std(t) for t in times]
+        print("Average time: ", avg_time)
+        print("Standard deviation: ", std_time)
+        plt.figure()
+        plt.plot([0, 1, 2, 3, 4], avg_time)
+        plt.xlabel('Decision Strategy')
+        plt.xticks([0, 1, 2, 3, 4], ['CSP', 'DFS_STORE_LEGAL_RECURSIVE', 'DFS_STORE_LEGAL', 'DFS_SORTED_RECURSIVE', 'DFS_SORTED'])
+        plt.ylabel('Average time [s]')
+        plt.title('Average time for different decision strategies')
+        plt.figure()
+        plt.plot([0, 1, 2, 3, 4], std_time)
+        plt.xlabel('Decision Strategy')
+        plt.xticks([0, 1, 2, 3, 4], ['CSP', 'DFS_STORE_LEGAL_RECURSIVE', 'DFS_STORE_LEGAL', 'DFS_SORTED_RECURSIVE', 'DFS_SORTED'])
+        plt.ylabel('Standard deviation')
+        plt.title('Standard deviation of time for different decision strategies')
+        plt.show()
+        #print("Time: ", times)
+        return
+    
 if __name__=="__main__":
     statistics = Statistics()
-    #statistics.get_perc_numbers_removed([2,3,4], 10)
-    statistics.compare_CSP_strategies(5, 100)
+    statistics.get_perc_numbers_removed([2,3,4], 10)
+    #statistics.compare_CSP_strategies(4, 10)
+    #statistics.compare_DFS_strategies(4, 10)
