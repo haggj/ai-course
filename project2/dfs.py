@@ -86,7 +86,10 @@ class SudokuDFS:
 
     def solve_recursive(self, state: SudokuBoard, version=Version.IMPROVED):
         self.reset_stats()
-        return self._solve_recursive(deepcopy(state), version)
+        solution = self._solve_recursive(deepcopy(state), version)
+        if not solution:
+            raise Exception("Could not find solution...")
+        return solution
 
     def _solve_recursive(self, state: SudokuBoard, version=Version.IMPROVED):
 
@@ -128,8 +131,7 @@ solver = CSP_Solver()
 sudoku = solver.generate_unique_sudoku(3, 40)
 
 # Generate sudoku manually
-#sudoku = SudokuBoard(n=3, seed=10)
-#sudoku._board[3,0] = 4
+sudoku = SudokuBoard(n=3, seed=10)
 print(sudoku)
 
 
