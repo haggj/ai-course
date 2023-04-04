@@ -31,13 +31,13 @@ def run(ALG):
 
 def plot(args):
     statistics = Statistics()
-    if isinstance(args.n, int):
-        info(f"Input more than one sudoku size to plot, e.g. --n 2 3 4", pre="\n\n")
-        return
     if args.plot_comparison:
         info(f"Compare strategies starting for sudoku sizes {args.n}", pre="\n\n")
         statistics.compare_strategies(args.n, args.s)
     if args.plot_numbers_removed:
+        if len(args.n) == 1:
+            info(f"Input more than one sudoku size to plot, e.g. --n 2 3 4", pre="\n\n")
+            return
         info(f"Get percentage of removed numbers starting for sudoku sizes {args.n}", pre="\n\n")
         statistics.get_perc_numbers_removed(args.n, args.s)
 
