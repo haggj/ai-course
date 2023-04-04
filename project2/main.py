@@ -46,7 +46,7 @@ if __name__=="__main__":
     parser = argparse.ArgumentParser()
     algorithms = ["all", "sorted", "store_legal", "rec.sorted", "rec.store_legal"]
     parser.add_argument('--algorithm', type=str, default="all", help="The algorithms which you want to run to solve the Sudoku.", choices=algorithms)
-    parser.add_argument('--n', type=int, nargs="+", default=3, help="This parameter controls the size of the generated board. E.g. if size is 3, the generated board is 9x9.")
+    parser.add_argument('--n', type=int, nargs="+", default=[3], help="This parameter controls the size of the generated board. E.g. if size is 3, the generated board is 9x9. Several sizes can be inputted.")
     parser.add_argument('--plot_comparison', type=bool, default=False, help="With this parameter the required time of different DFS strategies and the CSP solver can be plotted.")
     parser.add_argument('--plot_numbers_removed', type=bool, default=False, help="With this parameter the percentage of numbers removed until the sudoku no longer has only one solution can be plotted.")
     parser.add_argument('--s', type=int, default=10, help="This parameter controls the number of experiments which are run to plot the statistics.")
@@ -57,15 +57,16 @@ if __name__=="__main__":
         plot(args)
         exit()
 
-    # Generate sudoku via CSP solver
-    size = args.n * args.n
-    info(f"Generating field of size {size}x{size}")
-    solver = CSP_Solver()
-    sudoku = solver.generate_unique_sudoku(args.n, 40)
+    for n in args.n:  
+        # Generate sudoku via CSP solver
+        size = n * n
+        info(f"Generating field of size {size}x{size}")
+        solver = CSP_Solver()
+        sudoku = solver.generate_unique_sudoku(n, 40)
 
-    # Run CSP solver
-    info(f"CSP solver starting", pre="\n\n")
-    solver.solve_csp(deepcopy(sudoku), log_stats=True)
+        # Run CSP solver
+        info(f"CSP solver starting", pre="\n\n")
+        solver.solve_csp(deepcopy(sudoku), log_stats=True)
 
-    # Run our solvers
-    run(args.algorithm)
+        # Run our solvers
+        run(args.algorithm)
