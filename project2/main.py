@@ -5,6 +5,7 @@ from CSP_Solver import CSP_Solver
 from dfs import SudokuDFS
 from sudoku import Version
 from statistics import Statistics
+from memory_profiler import memory_usage
 
 
 def info(msg, pre=""):
@@ -15,19 +16,28 @@ def run(ALG):
     dfs = SudokuDFS(board=sudoku)
     if ALG == "sorted" or ALL:
         info(f"Version 'sorted' starting", pre="\n\n")
-        dfs.solve(Version.SORTED)
+        func = lambda: dfs.solve(Version.SORTED)
+        mem_usage = memory_usage(func, interval=1e-6)
+        info('Maximum memory usage: %s' % max(mem_usage))
+
 
     if ALG == "store_legal" or ALL:
         info(f"Version 'store_legal' starting", pre="\n\n")
-        dfs.solve(Version.STORE_LEGAL)
+        func = lambda: dfs.solve(Version.STORE_LEGAL)
+        mem_usage = memory_usage(func, interval=1e-6)
+        info('Maximum memory usage: %s' % max(mem_usage))
 
     if ALG == "rec.sorted" or ALL:
         info(f"Version 'rec.sorted' starting", pre="\n\n")
-        dfs.solve_recursive(sudoku, Version.SORTED)
+        func = lambda: dfs.solve_recursive(sudoku, Version.SORTED)
+        mem_usage = memory_usage(func, interval=1e-6)
+        info('Maximum memory usage: %s' % max(mem_usage))
 
     if ALG == "rec.store_legal" or ALL:
         info(f"Version 'rec.store_legal' starting", pre="\n\n")
-        dfs.solve_recursive(sudoku, Version.STORE_LEGAL)
+        func = lambda: dfs.solve_recursive(sudoku, Version.STORE_LEGAL)
+        mem_usage = memory_usage(func, interval=1e-6)
+        info('Maximum memory usage: %s' % max(mem_usage))
 
 def plot(args):
     statistics = Statistics()
@@ -66,7 +76,10 @@ if __name__=="__main__":
 
         # Run CSP solver
         info(f"CSP solver starting", pre="\n\n")
-        solver.solve_csp(deepcopy(sudoku), log_stats=True)
-
+        
+        func = lambda: solver.solve_csp(deepcopy(sudoku), log_stats=True)
+        mem_usage = memory_usage(func, interval=1e-6)
+        info('Maximum memory usage: %s' % max(mem_usage))
+        
         # Run our solvers
         run(args.algorithm)
