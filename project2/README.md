@@ -26,9 +26,16 @@ The X axis displays the grid size of the Sudoku and the Y axis the percentage of
 The plotted time is the average of solving 10 different puzzles for each algorithm.
 The X axis displays the label of the algorithm and the Y axis the average time to solve a Sudoku of given size
 
-## Test Script - main.py
+## Usage
 
-Executing the main.py creates first a Sudoku puzzle with a unique solution. Then this puzzle gets solved by the CSP Solver as benchmark and in the following solved by our DFS algorithm, using the version defined by the user input.
+```bash
+# Run all algorithms on a 9x9 grid
+python3 main.py --algorithm all --n 3
+# Comparing CSP with the rec.sorted on a 16x16 grid
+python3 main.py --algorithm rec.sorted --n 4
+```
+
+Executing the `main.py` creates first a Sudoku puzzle with a unique solution. Then this puzzle gets solved by the CSP Solver as benchmark and in the following solved by our DFS algorithm, using the version defined by the user input.
 It is also possible to create the Statistics mentioned above with adding an optional flag to the input arguments.
 To run this Script execute main.py with following arguments:
 * --algorithm (to choose version of DFS algorithm)
