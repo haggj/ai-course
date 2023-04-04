@@ -1,7 +1,6 @@
 import time
 from copy import deepcopy
 
-from CSP_Solver import CSP_Solver
 from sudoku import SudokuBoard, Version
 from queue import LifoQueue
 
@@ -127,23 +126,5 @@ class SudokuDFS:
             state.undo_move(move)
         return None
 
-# Generate sudoku via CSP solver
-solver = CSP_Solver()
-sudoku = solver.generate_unique_sudoku(3, 40)
-
-# Generate sudoku manually
-#sudoku = SudokuBoard(n=3, seed=10)
-print(sudoku)
 
 
-# CSP solver
-solver.solve_csp(deepcopy(sudoku), log_stats=True)
-
-dfs = SudokuDFS(board=sudoku)
-sol1 = dfs.solve(Version.SORTED)
-sol2 = dfs.solve(Version.STORE_LEGAL)
-sol3 = dfs.solve_recursive(sudoku, Version.SORTED)
-sol4 = dfs.solve_recursive(sudoku, Version.STORE_LEGAL)
-assert sol1 == sol2
-assert sol2 == sol3
-assert sol3 == sol4
